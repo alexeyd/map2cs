@@ -144,7 +144,7 @@ CTextureFile* CTextureManager::GetTexture(const char* TextureName)
 
   //First, we search in the array of already stored textures.
   size_t i;
-  for (i=0; i<m_StoredTextures.Length(); i++)
+  for (i=0; i<m_StoredTextures.GetSize(); i++)
   {
     CTextureFile* pTexture = m_StoredTextures[i];
     assert(pTexture);
@@ -155,7 +155,7 @@ CTextureFile* CTextureManager::GetTexture(const char* TextureName)
   }
 
   //If we didn't find it there, we look in all known texture archives.
-  for (i=0; i<m_TextureArchives.Length(); i++)
+  for (i=0; i<m_TextureArchives.GetSize(); i++)
   {
     CTextureArchive* pTexArchive = m_TextureArchives[i];
     assert(pTexArchive);
@@ -175,7 +175,7 @@ CTextureFile* CTextureManager::GetTexture(const char* TextureName)
         "Map2CS.TextureSettings.DefaultTexture", ""));
 
   //Now we create a default texture for the missing texture.
-  for (i=0; i<m_TextureArchives.Length(); i++)
+  for (i=0; i<m_TextureArchives.GetSize(); i++)
   {
     CTextureArchive* pTexArchive = m_TextureArchives[i];
     assert(pTexArchive);
@@ -211,7 +211,7 @@ bool CTextureManager::AddAllTexturesToVFS(csRef<iVFS> VFS, const char* path)
 {
   bool ok = true;
   size_t i;
-  for (i=0; i<m_StoredTextures.Length(); i++)
+  for (i=0; i<m_StoredTextures.GetSize(); i++)
   {
     CTextureFile* pTexture = m_StoredTextures[i];
     assert(pTexture);

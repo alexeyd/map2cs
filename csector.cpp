@@ -169,7 +169,7 @@ bool CCSSector::Write(csRef<iDocumentNode> node, CIWorld* pIWorld)
   }
 
   {
-    if (m_Portals.Length() > 0)
+    if (m_Portals.GetSize() > 0)
     {
       CMapEntity* pEntity = m_pOriginalBrush->GetEntity();
 
@@ -184,7 +184,7 @@ bool CCSSector::Write(csRef<iDocumentNode> node, CIWorld* pIWorld)
       size_t i;
       size_t j;
 
-      for (i=0; i<m_Portals.Length(); i++)
+      for (i=0; i<m_Portals.GetSize(); i++)
       {
         CIPortal* pPortal = m_Portals[i];
         for (j=0; j<pPortal->GetPolygonCount(); j++)
@@ -232,7 +232,7 @@ bool CCSSector::Write(csRef<iDocumentNode> node, CIWorld* pIWorld)
 bool CCSSector::WriteWorldspawn(csRef<iDocumentNode> node, CIWorld* pWorld)
 {
   size_t i;
-  for (i=0; i<m_Things.Length(); i++)
+  for (i=0; i<m_Things.GetSize(); i++)
   {
     if (strcasecmp(m_Things[i]->GetClassname(), "worldspawn")==0)
     {
@@ -272,7 +272,7 @@ bool CCSSector::WriteWorldspawn(csRef<iDocumentNode> node, CIWorld* pWorld)
 bool CCSSector::WriteThings(csRef<iDocumentNode> node, CIWorld* pWorld)
 {
   size_t i;
-  for (i=0; i<m_Things.Length(); i++)
+  for (i=0; i<m_Things.GetSize(); i++)
   {
     if (strcasecmp(m_Things[i]->GetClassname(), "worldspawn")!=0)
     {
@@ -467,7 +467,7 @@ bool CCSSector::WriteNodes(csRef<iDocumentNode> node, CIWorld* pWorld)
 
   //iterate all nodes
   size_t i;
-  for (i=0; i<m_Nodes.Length(); i++)
+  for (i=0; i<m_Nodes.GetSize(); i++)
   {
     CMapEntity* pEntity = m_Nodes[i];
     CdVector3 Origin(0,0,0);

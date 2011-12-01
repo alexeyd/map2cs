@@ -96,7 +96,7 @@ public:
   void SetErrorInfo (int BrushLineNumber, size_t PlaneNumber);
 
   /// Access all vertices from outside
-  size_t             GetVertexCount() const     {return m_Vertices.Length();}
+  size_t             GetVertexCount() const     {return m_Vertices.GetSize();}
   CdVector3          GetVertex(size_t index) const {return *(m_Vertices.Get(index));}
   CMapTexturedPlane* GetPlane (size_t index) const {return m_Planes.Get(index);}
 

@@ -123,13 +123,13 @@ public:
   CTextureFile* GetTexture(const char* TextureName);
 
   /// Get the number of all contained entities
-  size_t         GetNumEntities()     {return m_Entities.Length();}
+  size_t         GetNumEntities()     {return m_Entities.GetSize();}
 
   /// Get the specified entity
   CMapEntity* GetEntity(size_t index) {return m_Entities.Get(index);}
 
   /// Get the number of the contained planes
-  size_t         GetPlaneCount()      {return m_Planes.Length();}
+  size_t         GetPlaneCount()      {return m_Planes.GetSize();}
 
   /// Get the specified plane
   CMapTexturedPlane* GetPlane(size_t index) {return m_Planes.Get(index);}

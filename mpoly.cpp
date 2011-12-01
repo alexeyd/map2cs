@@ -40,7 +40,7 @@ CMapPolygon::CMapPolygon(const CMapPolygon& poly)
   m_BrushLineNumber = poly.m_BrushLineNumber;
   m_PlaneNumber     = poly.m_PlaneNumber;
   size_t i;
-  for (i=0; i<poly.m_Planes.Length(); i++)
+  for (i=0; i<poly.m_Planes.GetSize(); i++)
   {
     m_Planes.Push(poly.m_Planes[i]); //only stored by reference
   }
@@ -60,7 +60,7 @@ void CMapPolygon::Create(CMapTexturedPlane*              pBaseplane,
                           CMapBrush*                     pBrush)
 {
   assert(pBaseplane);
-  assert(planes.Length()>2);
+  assert(planes.GetSize()>2);
 
   //Remove all previous contents
   Clear();
@@ -74,7 +74,7 @@ void CMapPolygon::Create(CMapTexturedPlane*              pBaseplane,
   //Also we will remove all planes that don't create an edge right here.
   size_t p=0;
   CMapTexturedPlaneVector RedplanesStage1;
-  for (p=0; p<planes.Length(); p++)
+  for (p=0; p<planes.GetSize(); p++)
   {
     CMapTexturedPlane* pPlane = planes[p];
     if (pPlane->IsSameGeometry(pBaseplane) ||
@@ -85,7 +85,7 @@ void CMapPolygon::Create(CMapTexturedPlane*              pBaseplane,
 
 
   CMapTexturedPlaneVector redplanes;
-  for (p=0; p<RedplanesStage1.Length(); p++)
+  for (p=0; p<RedplanesStage1.GetSize(); p++)
   {
     CMapTexturedPlane* pPlane = RedplanesStage1[p];
 
@@ -140,10 +140,10 @@ void CMapPolygon::Create(CMapTexturedPlane*              pBaseplane,
   while ((pPlane2 != m_Planes[0]) && FoundNewVertex)
   {
     FoundNewVertex = false;
-    pPlane1 = m_Planes[m_Planes.Length()-1];
+    pPlane1 = m_Planes[m_Planes.GetSize()-1];
     //pPlane1 = pPlane2;
 
-    size_t NumPlanes = redplanes.Length();
+    size_t NumPlanes = redplanes.GetSize();
 
     //Check all planes, if they will form a new legal vertex
     //with the baseplane and plane1 (the last found plane)
@@ -153,7 +153,7 @@ void CMapPolygon::Create(CMapTexturedPlane*              pBaseplane,
 
       //Only after three planes have been inserted, we can check if
       //m_Planes[0] will close the polygon.
-      //if (m_Planes.Length() < 3 && i==0) continue;
+      //if (m_Planes.GetSize() < 3 && i==0) continue;
 
       //If this plane is to be processed, and both planes will form
       //a vertex with the baseplane, we need to do further checks.
@@ -164,9 +164,9 @@ void CMapPolygon::Create(CMapTexturedPlane*              pBaseplane,
         //vertices. If this is the case, we will ignore that point, because
         //this is an identitcal edge to a previous edge, and would close the
         //polygon in an illegal way.
-        if ((((*m_Vertices[m_Vertices.Length()-1])-point).Norm()<SMALL_EPSILON) ||
-            (m_Vertices.Length() > 1 &&
-             ((*m_Vertices[m_Vertices.Length()-2])-point).Norm()<SMALL_EPSILON))
+        if ((((*m_Vertices[m_Vertices.GetSize()-1])-point).Norm()<SMALL_EPSILON) ||
+            (m_Vertices.GetSize() > 1 &&
+             ((*m_Vertices[m_Vertices.GetSize()-2])-point).Norm()<SMALL_EPSILON))
         {
           //This would close the polygon too early. We wont handle this plane.
           //If there is no alternative found later on, then we declare this polygon
@@ -176,7 +176,7 @@ void CMapPolygon::Create(CMapTexturedPlane*              pBaseplane,
 
         //See if the new Vertex is a valid vertex. For this we use the original
         //planes array, and not the reduced array!
-        //assert(point != *(m_Vertices[m_Vertices.Length()-1]));
+        //assert(point != *(m_Vertices[m_Vertices.GetSize()-1]));
         if (CheckIfInside(point, planes, m_pBaseplane, pPlane1, pPlane2))
         {
           //Ok, this is a good next plane
@@ -241,9 +241,9 @@ void CMapPolygon::Clear()
 
 bool CMapPolygon::IsEmpty()
 {
-  assert(m_Vertices.Length() == m_Planes.Length());
+  assert(m_Vertices.GetSize() == m_Planes.GetSize());
 
-  return m_Vertices.Length() == 0;
+  return m_Vertices.GetSize() == 0;
 }
 
 double CMapPolygon::GetArea()
@@ -263,7 +263,7 @@ double CMapPolygon::GetArea()
   CdVector3 Sum(0,0,0);
 
   size_t i;
-  for (i=0; i<(m_Vertices.Length()-1); i++)
+  for (i=0; i<(m_Vertices.GetSize()-1); i++)
   {
     Sum += (*(m_Vertices[i])) % (*(m_Vertices[i+1]));
   }
@@ -286,7 +286,7 @@ void CMapPolygon::Split(CMapTexturedPlane* pSplitplane,
   //unneeded planes and vertices.
   CMapTexturedPlaneVector NewPlanes;
 
-  size_t NumPlanes = m_Planes.Length();
+  size_t NumPlanes = m_Planes.GetSize();
   size_t i;
   for (i=0; i<NumPlanes; i++)
   {
@@ -306,12 +306,12 @@ void CMapPolygon::SetPolygon(CMapPolygon* pPoly)
   m_pBaseplane = pPoly->m_pBaseplane;;
 
   size_t i=0;
-  for (i=0; i<pPoly->m_Vertices.Length(); i++)
+  for (i=0; i<pPoly->m_Vertices.GetSize(); i++)
   {
     m_Vertices.Push(new CdVector3(*pPoly->m_Vertices[i]));
   }
 
-  for (i=0; i<pPoly->m_Planes.Length(); i++)
+  for (i=0; i<pPoly->m_Planes.GetSize(); i++)
   {
     m_Planes.Push(pPoly->m_Planes[i]);
   }
@@ -322,18 +322,18 @@ void CMapPolygon::FlipSide()
   m_pBaseplane = m_pBaseplane->GetMirror();
 
   size_t i=0;
-  for (i=0; i<m_Vertices.Length()/2; i++)
+  for (i=0; i<m_Vertices.GetSize()/2; i++)
   {
     CdVector3* pHelp                    = m_Vertices[i];
-    m_Vertices[i]                       = m_Vertices[m_Vertices.Length()-i-1];
-    m_Vertices[m_Vertices.Length()-i-1] = pHelp;
+    m_Vertices[i]                       = m_Vertices[m_Vertices.GetSize()-i-1];
+    m_Vertices[m_Vertices.GetSize()-i-1] = pHelp;
   }
 
-  for (i=0; i<m_Planes.Length()/2; i++)
+  for (i=0; i<m_Planes.GetSize()/2; i++)
   {
     CMapTexturedPlane* pHelp        = m_Planes[i];
-    m_Planes[i]                     = m_Planes[m_Planes.Length()-i-1];
-    m_Planes[m_Planes.Length()-i-1] = pHelp;
+    m_Planes[i]                     = m_Planes[m_Planes.GetSize()-i-1];
+    m_Planes[m_Planes.GetSize()-i-1] = pHelp;
   }
 }
 
@@ -348,7 +348,7 @@ void CMapPolygon::GetStartplanes(const CMapTexturedPlaneVector& planes,
                                  CMapTexturedPlane*&            pPlane2,
                                  CdVector3&                     point)
 {
-  size_t NumPlanes = planes.Length();
+  size_t NumPlanes = planes.GetSize();
 
   //Try the follwing for all possible pairs of planes.
   size_t i, j;
@@ -399,7 +399,7 @@ int  CMapPolygon::GetNumberOfValidVertices(CMapTexturedPlane*             pPlane
                        // getting three values happens only in case of an error,
                        // that will be explicitly tracked down.
 
-  size_t NumPlanes = planes.Length();
+  size_t NumPlanes = planes.GetSize();
 
   //Try the follwing for all planes.
   size_t i;
@@ -454,7 +454,7 @@ bool CMapPolygon::CheckIfInside(const CdVector3&               point,
   //All thre planes create at least a single point. Now we need to
   //determine, if that point is inside or outside the given polygons
 
-  size_t k, NumPlanes = planes.Length();
+  size_t k, NumPlanes = planes.GetSize();
   for (k=0; k<NumPlanes; k++)
   {
     CMapTexturedPlane* pPlane = planes[k];
@@ -484,9 +484,9 @@ void CMapPolygon::DumpPolyinfo(CMapTexturedPlane*             pBaseplane,
                                const CMapTexturedPlaneVector& planes)
 {
   size_t j, i, y, c, x;
-  for (j=0; j<m_Planes.Length(); j++)
+  for (j=0; j<m_Planes.GetSize(); j++)
   {
-    for (i=0; i<planes.Length(); i++)
+    for (i=0; i<planes.GetSize(); i++)
     {
       if (m_Planes[j] == planes[i])
       {
@@ -496,11 +496,11 @@ void CMapPolygon::DumpPolyinfo(CMapTexturedPlane*             pBaseplane,
   }
   csPrintf("\n");
 
-  for (y=0; y<planes.Length(); y++)
+  for (y=0; y<planes.GetSize(); y++)
   {
     for (c=0; c<3; c++)
     {
-      for (x=0; x<planes.Length(); x++)
+      for (x=0; x<planes.GetSize(); x++)
       {
         CdVector3 point;
         if (x==y)

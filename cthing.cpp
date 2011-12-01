@@ -124,7 +124,7 @@ bool CCSThing::WriteAsPart(csRef<iDocumentNode> node, CIWorld* pIWorld, CISector
 
   Vb.WriteCS(part, pWorld);
 
-  for (i=0; i<m_Polygon.Length(); i++)
+  for (i=0; i<m_Polygon.GetSize(); i++)
   {
     CMapPolygonSet* pPolySet = m_Polygon[i];
     for (j=0; j<pPolySet->GetPolygonCount(); j++)

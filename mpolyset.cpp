@@ -56,7 +56,7 @@ CMapPolygonSet& CMapPolygonSet::operator=(const CMapPolygonSet& Other)
 void CMapPolygonSet::AddPolygons(const CMapPolygonSet& Other)
 {
   size_t i;
-  for (i=0; i<Other.m_Polygon.Length(); i++)
+  for (i=0; i<Other.m_Polygon.GetSize(); i++)
   {
     m_Polygon.Push(new CMapPolygon(*Other.m_Polygon.Get(i)));
   }
@@ -65,7 +65,7 @@ void CMapPolygonSet::AddPolygons(const CMapPolygonSet& Other)
 void CMapPolygonSet::FlipSide()
 {
   size_t i;
-  for (i=0; i<m_Polygon.Length(); i++)
+  for (i=0; i<m_Polygon.GetSize(); i++)
   {
     m_Polygon[i]->FlipSide();
   }
@@ -77,7 +77,7 @@ void CMapPolygonSet::ReduceToCommonParts(const CMapPolygonSet& Other, bool optim
   size_t i, j, k;
 
   //We handle every pair of convex Polygon and Other convex Polygon
-  for (i=0; i<m_Polygon.Length(); i++)
+  for (i=0; i<m_Polygon.GetSize(); i++)
   {
     if (optimise)
     {
@@ -93,7 +93,7 @@ void CMapPolygonSet::ReduceToCommonParts(const CMapPolygonSet& Other, bool optim
     }
 
     //We need to split the polygon into smaller parts.
-    for (j=0; j<Other.m_Polygon.Length(); j++)
+    for (j=0; j<Other.m_Polygon.GetSize(); j++)
     {
       CMapPolygon  Poly(*(m_Polygon[i]));
       CMapPolygon* pClipPoly = Other.m_Polygon[j];
@@ -117,7 +117,7 @@ void CMapPolygonSet::ReduceToCommonParts(const CMapPolygonSet& Other, bool optim
   //it by a new list.
   DELETE_VECTOR_MEMBERS(m_Polygon);
   size_t p;
-  for (p=0; p<NewPoly.Length(); p++)
+  for (p=0; p<NewPoly.GetSize(); p++)
   {
     m_Polygon.Push(NewPoly.Get(p));
   }
@@ -126,7 +126,7 @@ void CMapPolygonSet::ReduceToCommonParts(const CMapPolygonSet& Other, bool optim
 void CMapPolygonSet::RemoveCommonParts(const CMapPolygonSet& Other, bool optimise)
 {
   size_t i;
-  for (i=0; i<Other.m_Polygon.Length(); i++)
+  for (i=0; i<Other.m_Polygon.GetSize(); i++)
   {
     if (optimise)
     {
@@ -154,7 +154,7 @@ void CMapPolygonSet::RemovePolygon(const CMapPolygon& Other)
   CMapPolygonVector NewPoly;
 
   size_t i, k;
-  for (i=0; i<m_Polygon.Length(); i++)
+  for (i=0; i<m_Polygon.GetSize(); i++)
   {
     CMapPolygon Poly(*(m_Polygon[i]));
 
@@ -182,7 +182,7 @@ void CMapPolygonSet::RemovePolygon(const CMapPolygon& Other)
   //it by a new list.
   DELETE_VECTOR_MEMBERS(m_Polygon);
   size_t p;
-  for (p=0; p<NewPoly.Length(); p++)
+  for (p=0; p<NewPoly.GetSize(); p++)
   {
     m_Polygon.Push(NewPoly.Get(p));
   }

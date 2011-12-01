@@ -83,7 +83,7 @@ CMapBrush::CMapBrush(CMapEntity* pEntity)
 CMapBrush::~CMapBrush()
 {
   size_t i;
-  for (i=0; i<m_Polygons.Length(); i++)
+  for (i=0; i<m_Polygons.GetSize(); i++)
   {
     delete m_Polygons[i];
   }
@@ -301,7 +301,7 @@ bool CMapBrush::ReadVector(CMapParser* pParser, CdVector3& v)
 void CMapBrush::CreatePolygons()
 {
   CMapPolygon* pPoly = new CMapPolygon;
-  size_t NumPlanes = m_Planes.Length();
+  size_t NumPlanes = m_Planes.GetSize();
   size_t i;
   for (i = 0; i<NumPlanes; i++)
   {
@@ -320,7 +320,7 @@ void CMapBrush::CreatePolygons()
 
 bool CMapBrush::IsInside(CdVector3& v)
 {
-  size_t k, NumPlanes = m_Planes.Length();
+  size_t k, NumPlanes = m_Planes.GetSize();
   for (k=0; k<NumPlanes; k++)
   {
     CMapTexturedPlane* pPlane = m_Planes[k];
@@ -344,7 +344,7 @@ void CMapBrush::IntersectWithPlane(CMapTexturedPlane* pIntersectplane,
 
 bool CMapBrush::IsVisible()
 {
-  size_t k, NumPlanes = m_Planes.Length();
+  size_t k, NumPlanes = m_Planes.GetSize();
   for (k=0; k<NumPlanes; k++)
   {
     CMapTexturedPlane* pPlane = m_Planes[k];

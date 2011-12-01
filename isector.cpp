@@ -90,7 +90,7 @@ void CISector::CreatePortal(CISector* pOtherSector)
     CMapPolygonSet*    pOwnWall  = new CMapPolygonSet(*m_pOriginalBrush->GetPolygon(i));
     CMapTexturedPlane* pOwnPlane = pOwnWall->GetBaseplane();
 
-    for (j=0; j<pOtherSector->m_Walls.Length(); j++)
+    for (j=0; j<pOtherSector->m_Walls.GetSize(); j++)
     {
       CMapPolygonSet*    pOtherWall  = 
 	new CMapPolygonSet(*pOtherSector->m_pOriginalBrush->GetPolygon((int)j));
@@ -138,7 +138,7 @@ CMapPolygonSet* CISector::GetCorrespondingWall(CMapTexturedPlane* pPlane,
   if (!pPlane) return 0;
 
   size_t i;
-  for (i=0; i<m_Walls.Length(); i++)
+  for (i=0; i<m_Walls.GetSize(); i++)
   {
     CMapPolygonSet*    pOwnWall  = m_Walls[i];
     CMapTexturedPlane* pOwnPlane = pOwnWall->GetBaseplane();

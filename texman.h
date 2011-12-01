@@ -57,7 +57,7 @@ public:
   bool AddAllTexturesToVFS(csRef<iVFS> VFS, const char* path);
 
   /// returns the Number of known textures
-  size_t GetTextureCount() { return m_StoredTextures.Length(); }
+  size_t GetTextureCount() { return m_StoredTextures.GetSize(); }
 
   /// returns the n-th texture (from 0 to GetTextureCount()-1)
   CTextureFile* GetTexture (size_t index) {return m_StoredTextures[index];}

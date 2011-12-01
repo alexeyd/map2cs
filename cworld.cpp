@@ -77,7 +77,7 @@ void CCSWorld::FindSectors()
     }
   } //for entity
 
-  if (m_Sectors.Length() == 0)
+  if (m_Sectors.GetSize() == 0)
   {
     GenerateDefaultsector();
   }
@@ -543,8 +543,8 @@ bool CCSWorld::WriteTextures(csRef<iDocumentNode> node)
 
   FindAdditionalTextures();
 
-  csSet<csStrKey> userMaterials;
-  csSet<csStrKey> userTextures;
+  csSet<csString> userMaterials;
+  csSet<csString> userTextures;
 
   const char* mats = pEntity->GetValueOfKey("usermaterials");
   csString mat;
@@ -806,7 +806,7 @@ bool CCSWorld::WriteSettings(csRef<iDocumentNode> node)
 bool CCSWorld::WriteSectors(csRef<iDocumentNode> node)
 {
   size_t i;
-  for (i=0; i<m_Sectors.Length(); i++)
+  for (i=0; i<m_Sectors.GetSize(); i++)
   {
     if (!m_Sectors[i]->Write(node, this)) return false;
   }

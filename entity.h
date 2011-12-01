@@ -79,11 +79,11 @@ public:
   void CreatePolygons();
 
   /// Access all brushes from outside
-  size_t     GetNumBrushes()     {return m_Brushes.Length();}
+  size_t     GetNumBrushes()     {return m_Brushes.GetSize();}
   CMapBrush* GetBrush(size_t index) {return m_Brushes.Get(index);}
 
   /// Access all curves from outside
-  size_t     GetCurveCount()      {return m_Curves.Length();}
+  size_t     GetCurveCount()      {return m_Curves.GetSize();}
   CMapCurve* GetCurve(size_t index) {return m_Curves.Get(index);}
 
   /**
@@ -131,7 +131,7 @@ public:
   bool GetBoolValueOfKey(const char* key, bool defaultvalue = false);
 
   /// Get the number of Key/Value pairs
-  size_t GetNumberOfKeyValuePairs() {return m_Keymap.Length();}
+  size_t GetNumberOfKeyValuePairs() {return m_Keymap.GetSize();}
 
   /// Get the key value pair at the given index (0..GetNumberOfKeyValuePairs()-1)
   CMapKeyValuePair* GetKeyValuePair(size_t index) {return m_Keymap[index];}

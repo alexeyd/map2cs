@@ -21,7 +21,7 @@
 
 #include "cssysdef.h"
 #include "csutil/csendian.h"
-#include "csgfx/memimage.h"
+#include "csgfx/imagememory.h"
 #include "csgfx/rgbpixel.h"
 #include "igraphic/imageio.h"
 #include "csutil/csstring.h"
@@ -222,7 +222,7 @@ bool CWad3File::Extract(const char* Texture, char*& Data, int& Size, csString& f
         keycolor_g = pal[255].green;
         keycolor_b = pal[255].blue;
       }
-      mi.SetKeycolor (keycolor_r, keycolor_g, keycolor_b);
+      mi.SetKeyColor (keycolor_r, keycolor_g, keycolor_b);
     }
     else
       has_keycolor = false;

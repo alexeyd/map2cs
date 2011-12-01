@@ -76,7 +76,7 @@ void CIWorld::FindSectors()
     }
   } //for entity
 
-  if (m_Sectors.Length() == 0)
+  if (m_Sectors.GetSize() == 0)
   {
     GenerateDefaultsector();
   }
@@ -148,12 +148,12 @@ void CIWorld::GenerateDefaultsector()
 void CIWorld::FindPortals()
 {
   size_t i, j;
-  for (i=0; i<m_Sectors.Length(); i++)
+  for (i=0; i<m_Sectors.GetSize(); i++)
   {
     CISector* pSector1 = m_Sectors[i];
     assert(pSector1);
 
-    for (j=0; j<m_Sectors.Length(); j++)
+    for (j=0; j<m_Sectors.GetSize(); j++)
     {
       if (j==i) continue;
 
@@ -169,7 +169,7 @@ void CIWorld::FindPortals()
 void CIWorld::InsertThings()
 {
   size_t i;
-  for (i=0; i<m_Sectors.Length(); i++)
+  for (i=0; i<m_Sectors.GetSize(); i++)
   {
     CISector* pSector = m_Sectors[i];
     assert(pSector);
@@ -181,7 +181,7 @@ void CIWorld::InsertThings()
 CISector* CIWorld::FindSectorForPoint(CdVector3& v)
 {
   size_t i;
-  for (i=0; i<m_Sectors.Length(); i++)
+  for (i=0; i<m_Sectors.GetSize(); i++)
   {
     CISector* pSector = m_Sectors[i];
     assert(pSector);
@@ -206,7 +206,7 @@ void CIWorld::BuildTexturelist()
     CTextureFile* pTexture = m_pMap->GetPlane((int)i)->GetTexture();
 
     bool TextureFound = false;
-    for (j=0; j<m_TextureFileNames.Length(); j++)
+    for (j=0; j<m_TextureFileNames.GetSize(); j++)
     {
       if (strcmp(m_TextureFileNames[j], pTexture->GetFilename()) == 0)
       {
@@ -232,7 +232,7 @@ void CIWorld::BuildTexturelist()
       CTextureFile* pTexture = pCurve->GetTexture();
 
       bool TextureFound = false;
-      for (j=0; j<m_TextureFileNames.Length(); j++)
+      for (j=0; j<m_TextureFileNames.GetSize(); j++)
       {
         if (strcmp(m_TextureFileNames[j], pTexture->GetFilename()) == 0)
         {
@@ -262,7 +262,7 @@ void CIWorld::BuildTexturelist()
       CTextureFile* pTexture = pTexMan->GetTexture(texturefilename);
 
       bool TextureFound = false;
-      for (j=0; j<m_TextureFileNames.Length(); j++)
+      for (j=0; j<m_TextureFileNames.GetSize(); j++)
       {
         if (strcmp(m_TextureFileNames[j], pTexture->GetFilename()) == 0)
         {

@@ -47,7 +47,7 @@ public:
   void InsertPolygon(CMapPolygonSet* pPolygon);
 
   /// Returns true, if this Thing contains no polygons.
-  bool IsEmpty() {return m_Polygon.Length() <= 0;}
+  bool IsEmpty() {return m_Polygon.GetSize() <= 0;}
 
   /// Get the name of the thing
   const char* GetName();

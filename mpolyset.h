@@ -62,7 +62,7 @@ public:
   CMapPolygonSet& operator=(const CMapPolygonSet& Other);
 
   /// Returns the number of polygons, this set is made of
-  size_t GetPolygonCount() {return m_Polygon.Length();}
+  size_t GetPolygonCount() {return m_Polygon.GetSize();}
 
   CMapPolygon* GetPolygon(size_t index) {return m_Polygon[index];}
 
@@ -93,7 +93,7 @@ public:
   void RemoveCommonParts(const CMapPolygonSet& Other, bool optimise=true);
 
   /// returns true, if the polygonset is empty.
-  bool IsEmpty() {return m_Polygon.Length()<=0;}
+  bool IsEmpty() {return m_Polygon.GetSize()<=0;}
 
   /**
     * Gets the Basplane for this polygon set. Attention: Though all

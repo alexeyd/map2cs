@@ -63,13 +63,13 @@ public:
   CISector* FindSectorForPoint(CdVector3& v);
 
   /// Get the number of "non-sector" entities
-  size_t GetNumEntities() {return m_Entities.Length();}
+  size_t GetNumEntities() {return m_Entities.GetSize();}
 
   /// Return the n-th "non-sector" entity
   CMapEntity* GetEntity(size_t n) {return m_Entities[n];}
 
   /// Get the number of sectors
-  size_t GetNumSectors() {return m_Sectors.Length();}
+  size_t GetNumSectors() {return m_Sectors.GetSize();}
 
   /// Return the n-th sector
   CISector* GetSector(size_t n) {return m_Sectors[n];}

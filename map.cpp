@@ -139,9 +139,9 @@ bool CMapFile::Read(const char* filename, const char* configfile)
   }
 
   csPrintf("Map contains:\n");
-  csPrintf("%zu Entites\n", m_Entities.Length());
+  csPrintf("%zu Entites\n", m_Entities.GetSize());
   csPrintf("%zu Brushes\n", m_NumBrushes);
-  csPrintf("%zu Unique planes\n", m_Planes.Length());
+  csPrintf("%zu Unique planes\n", m_Planes.GetSize());
   return true;
 }
 
@@ -188,7 +188,7 @@ CMapTexturedPlane* CMapFile::AddPlane(CdVector3 v1, CdVector3 v2, CdVector3 v3,
 CMapTexturedPlane* CMapFile::AddPlane(CMapTexturedPlane* pNewPlane)
 {
   //first we look in m_Planes to check, if a similar plane is already stored.
-  size_t i, NumPlanes = m_Planes.Length();
+  size_t i, NumPlanes = m_Planes.GetSize();
   for (i=0; i<NumPlanes; i++)
   {
     CMapTexturedPlane* pPlane = m_Planes[i];
@@ -222,7 +222,7 @@ CMapTexturedPlane* CMapFile::AddPlane(CMapTexturedPlane* pNewPlane)
 void CMapFile::CreatePolygons()
 {
   size_t i;
-  for (i=0; i<m_Entities.Length(); i++)
+  for (i=0; i<m_Entities.GetSize(); i++)
   {
     m_Entities[i]->CreatePolygons();
   }
@@ -327,7 +327,7 @@ bool CMapFile::AddTexture(const char* TextureName, CZipFile* pZipFile)
     simplename[len-4] = 0;
   }
 
-  for (int i=0; i<m_Wads.Length(); i++)
+  for (int i=0; i<m_Wads.GetSize(); i++)
   {
     if (m_Wads[i]->Extract(simplename, pData, Size))
     {

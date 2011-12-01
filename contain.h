@@ -63,12 +63,12 @@ CS_DECLARE_TYPED_VECTOR(CMapCurveVector,         CMapCurve);
 CS_DECLARE_TYPED_VECTOR(CCharVector,             char);
 
 #define DELETE_VECTOR_MEMBERS(VECT) \
-  {size_t Num=(VECT).Length(); size_t i; \
+  {size_t Num=(VECT).GetSize(); size_t i; \
    for (i=0;i<Num;i++) delete (VECT)[i]; \
    (VECT).DeleteAll();}
 
 #define COPY_VECTOR_MEMBERS(DEST, SRC, TYPE) \
-  {size_t Num=(SRC).Length(); \
+  {size_t Num=(SRC).GetSize(); \
   size_t i;  \
    for (i=0;i<Num;i++) (DEST).Push(new TYPE(*((SRC)[i])));}
 

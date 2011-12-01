@@ -56,10 +56,10 @@ void PrintSyntax()
 
 int appMain (iObjectRegistry* object_reg, int argc, char *argv[])
 {
-  csRef<iPluginManager> plugin_mgr = CS_QUERY_REGISTRY (object_reg, iPluginManager);
+  csRef<iPluginManager> plugin_mgr = csQueryRegistry<iPluginManager> (object_reg);
 
-  csRef<iImageIO> il = CS_LOAD_PLUGIN (plugin_mgr,
-    "crystalspace.graphic.image.io.multiplexer", iImageIO);
+  csRef<iImageIO> il = csLoadPlugin<iImageIO>(plugin_mgr,
+                                              "crystalspace.graphic.image.io.multiplexer");
   if (!il)
   {
     csPrintf ("Couldn't load image multiplexer!\n");
@@ -69,7 +69,8 @@ int appMain (iObjectRegistry* object_reg, int argc, char *argv[])
   {
    ImageLoader = il;
   }
-  csRef<iVFS> VFS = CS_QUERY_REGISTRY (object_reg, iVFS);
+
+  csRef<iVFS> VFS = csQueryRegistry<iVFS> (object_reg);
   if (!VFS)
   {
     csPrintf ("Couldn't load VFS!\n");

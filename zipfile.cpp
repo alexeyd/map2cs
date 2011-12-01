@@ -101,9 +101,9 @@ bool CZipFile::ExtractData(CBinaryData* pData, const char* zipname)
   assert(zipname);
 
   size_t filesize = 0;
-  if (FileExists (zipname, &filesize))
+  if (FileExists (zipname))
   {
-    char* pZipData = Read (zipname);
+    char* pZipData = Read (zipname, &filesize);
     assert(pZipData);
 
     pData->SetData (pZipData, (int)filesize);
