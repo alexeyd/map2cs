@@ -129,24 +129,27 @@ int appMain (iObjectRegistry* object_reg, int argc, char *argv[])
   csRef <iDocument> doc = xml->CreateDocument();
   csRef <iDocumentNode> root = doc->CreateRoot();
 
-  CCSWorld World;
-  World.Write(root, &Map, mapfile);
+  CCSWorld World(object_reg);
+  World.Create(&Map);
+  World.Save(root);
+
 
   remove (worldfile);
   VFS->Mount ("/map2cs_temp", worldfile);
   csPrintf ("Writing world...\n");
   doc->Write(VFS, "/map2cs_temp/world");
 
-  csPrintf ("Writing textures...\n");
+/*  csPrintf ("Writing textures...\n");
   if (!Map.GetTextureManager()->AddAllTexturesToVFS (VFS,
     "/map2cs_temp/"))
   {
     csPrintf ("Not all textures where written correctly.\n");
   }
+*/
 
   VFS->Unmount ("/map2cs_temp", worldfile);
 
-  csPrintf("done.");
+  csPrintf("done.\n");
 
   return 0;
 }
@@ -158,7 +161,15 @@ int main (int argc, char *argv[])
   if (!object_reg) return false;
   if (!csInitializer::RequestPlugins (object_reg,
 	CS_REQUEST_VFS,
+	CS_REQUEST_NULL3D,
+	CS_REQUEST_ENGINE,
+	CS_REQUEST_FONTSERVER,
 	CS_REQUEST_IMAGELOADER,
+	CS_REQUEST_LEVELLOADER,
+	CS_REQUEST_LEVELSAVER,
+	CS_REQUEST_REPORTER,
+	CS_REQUEST_REPORTERLISTENER,
+    CS_REQUEST_PLUGIN("crystalspace.graphics3d.shadermanager", iShaderManager),
 	CS_REQUEST_END))
   {
     return 1;

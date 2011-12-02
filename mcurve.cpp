@@ -113,6 +113,7 @@ bool CMapCurve::Read(CMapParser* pParser, CMapFile* pMap)
   return true;
 }
 
+#if 0
 bool CMapCurve::Write(csRef<iDocumentNode> node, CCSWorld* pWorld)
 {
   //Thomas Hieber, 16.5.2001: I know this method is wrong, but I don't know what format
@@ -205,5 +206,5 @@ bool CMapCurve::Write(csRef<iDocumentNode> node, CCSWorld* pWorld)
 
   return true;
 }
-
+#endif
 

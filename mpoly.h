@@ -23,6 +23,7 @@
 #define __MPOLY_H__
 
 #include "contain.h"
+#include "dmath3d.h"
 
 class CMapPolygon
 {
