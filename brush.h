@@ -23,12 +23,11 @@
 #define __BRUSH_H__
 
 #include "contain.h"
+#include "mparser.h"
+#include "texplane.h"
+#include "planeman.h"
+#include "dmath3d.h"
 
-//Some forward declarations needed in class declaration.
-class CMapParser;
-class CMapTexturedPlane;
-class CMapFile;
-class CdVector3;
 
 /**
   * This bounding box is to manage the bounding box of a brush, or any other
@@ -67,7 +66,7 @@ public:
   /**
     * The constructor as usual
     */
-  CMapBrush(CMapEntity* pEntity);
+  CMapBrush();
 
   /**
     * The destuctor as usual. Note, that this will _not_ destroy the Planes,
@@ -81,7 +80,8 @@ public:
     * occurs. returns false if an error occured. Parsing of the file should
     * then stop. The error message has then aready been generated.
     */
-  bool Read      (CMapParser* pParser, CMapFile* pMap);
+  bool Read      (CMapParser* pParser, 
+                  CTexturedPlaneManager *tex_plane_manager);
 
   /**
     * Reads three integer values from the parser and stores them inside a
@@ -114,9 +114,6 @@ public:
     */
   bool IsVisible();
 
-  /// returns a pointer to the entity that defined this brush (or 0)
-  CMapEntity* GetEntity() {return m_pEntity;}
-
   /// returns a pointer to the bounding box
   CMapBrushBoundingBox* GetBoundingBox() {return &m_BoundingBox;}
 
@@ -134,11 +131,6 @@ protected:
     * only a secondary data structure for convenience)
     */
   CMapPolygonVector       m_Polygons;
-
-  /**
-    * Pointer to the entity that defined this brush (or 0)
-    */
-  CMapEntity*             m_pEntity;
 
   /**
     * The number of the line, where the brush definition starts. (for error

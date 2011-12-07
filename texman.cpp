@@ -24,8 +24,6 @@
 #include "texman.h"
 #include "map.h"
 #include "texfile.h"
-#include "wad3file.h"
-#include "pk3file.h"
 #include "entity.h"
 
 #include "iutil/vfs.h"
@@ -41,92 +39,16 @@ static const char* Q3Extensions[] =
 
 CTextureManager::CTextureManager()
 {
-  m_pMap = 0;
 }
 
 CTextureManager::~CTextureManager()
 {
   DELETE_VECTOR_MEMBERS(m_StoredTextures);
-  DELETE_VECTOR_MEMBERS(m_TextureArchives);
 }
 
-void CTextureManager::LoadTextureArchives(CMapFile* pMap)
-{
-  assert(pMap);
-  m_pMap = pMap;
-
-  enum                          {wad, pk3, zip, MaxType};
-  const char* KeynameFormat[] = {
-    "Map2CS.TextureSettings.wad%d",
-    "Map2CS.TextureSettings.pk%d",
-    "Map2CS.TextureSettings.zip%d"};
-
-  int type;
-  for (type=0; type<MaxType; type++)
-  {
-    int nr = 1;
-    do
-    {
-      csString keyname;
-      char filename[300];
-      keyname.Format (KeynameFormat[type], nr);
-      strcpy(filename, pMap->GetConfigStr(keyname, ""));
-      if (filename[0])
-      {
-        nr++;
-        CTextureArchive* pArchive = 0;
-        switch (type)
-        {
-          case wad: pArchive = new CWad3File;   break;
-          case pk3: pArchive = new CPk3File;    break;
-          case zip: pArchive = new CZipArchive; break;
-        }
-        if (pArchive->Open(filename))
-        {
-          m_TextureArchives.Push(pArchive);
-        }
-        else
-        {
-          delete pArchive;
-        }
-      }
-      else
-      {
-        nr = -1;
-      }
-    }
-    while (nr>0);
-  }
-
-}
-
-void CTextureManager::LoadArchive (const char* filename)
-{
-
-  /******************************
-  Implemented to allow for a key
-  in the worldspawn entity to set
-  the texture package (currently
-  only supports one package)
-  ******************************/
-
-  CTextureArchive* pArchive = new CPk3File;
-  
-  if (pArchive->Open(filename)) 
-  {
-    m_TextureArchives.Push(pArchive);
-  }
-  else 
-  {
-    delete pArchive;
-  }
-
-}
 
 CTextureFile* CTextureManager::GetTexture(const char* TextureName)
 {
-  assert(m_pMap);
-
   csString CleanedUpTextureName (TextureName);
   CleanupTexturename (CleanedUpTextureName);
 
@@ -141,7 +63,7 @@ CTextureFile* CTextureManager::GetTexture(const char* TextureName)
       InternalName[p] = '_';
     }
   }
-
+#if 0
   //First, we search in the array of already stored textures.
   size_t i;
   for (i=0; i<m_StoredTextures.GetSize(); i++)
@@ -171,8 +93,7 @@ CTextureFile* CTextureManager::GetTexture(const char* TextureName)
   //That texture is not available. Now we will use the default texture
   //instead, if we are not already looking for the defaulttexture
   char defaultname[200];
-  strcpy(defaultname, m_pMap->GetConfigStr(
-        "Map2CS.TextureSettings.DefaultTexture", ""));
+  strcpy(defaultname, "");
 
   //Now we create a default texture for the missing texture.
   for (i=0; i<m_TextureArchives.GetSize(); i++)
@@ -193,7 +114,7 @@ CTextureFile* CTextureManager::GetTexture(const char* TextureName)
       return pTexture;
     }
   }
-
+#endif
   CTextureFile* pTexture = 0;
 
   csPrintf("Warning: texture '%s'('%s') is missing.\n        Making a new null texture.\n",

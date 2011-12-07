@@ -22,12 +22,11 @@
 #ifndef __TEXFILE_H__
 #define __TEXFILE_H__
 
-#include "bindata.h"
+#include "crystalspace.h"
 #include "csutil/ref.h"
 
-class CMapFile;
-class CZipFile;
-struct iVFS;
+#include "bindata.h"
+
 
 /**
   *
@@ -35,70 +34,39 @@ struct iVFS;
 class CTextureFile
 {
 public:
-  /**
-    *
-    */
   CTextureFile();
-
-  /// The destructor, will do some cleanup, as usual.
   ~CTextureFile();
 
-  /// Set the name of the texture
   void SetTexturename(const char* name);
+  const char* GetTexturename() const;
 
-  /// Get the name of the texture
-  const char* GetTexturename() {return m_Texturename;}
+  void SetFilename(const char* name);
+  const char* GetFilename() const;
 
-  /// Set the filename of the texture (including extension)
-  void SetFilename(const char* name) {m_Filename = name;}
+  void SetOriginalSize(int w, int h);
+  int GetOriginalWidth();
+  int GetOriginalHeight();
 
-  /// Get the filename of the texture (including extension)
-  const char* GetFilename() {return m_Filename;}
+  bool IsVisible() const;
+  void SetVisible (bool visible);
 
-  void SetOriginalSize(int w, int h)
-    {m_OriginalWidth = w; m_OriginalHeight = h;}
+  bool IsColorKeyed() const;
+  void GetKeyColor(float& r, float& g, float& b) const;
+  void SetKeyColor(float r, float g, float b);
 
-  /// Get the original width of the texture (before scaling)
-  int GetOriginalWidth()  {return m_OriginalWidth;}
 
-  /// Get the original height of the texture (before scaling)
-  int GetOriginalHeight() {return m_OriginalHeight;}
-
-  /// Adds this texture to the given Zip-File.
   bool AddToVFS(csRef<iVFS> VFS, const char* path);
 
-  /// Sets information about the original file
   void SetOriginalData(char* Data, int Size);
 
-  /**
-    * Returns false, if this Texture is some internal texture for Quake.
-    * this is the case for clip or hint brushes for example
-    */
-  bool IsVisible();
 
-  /// return true, if this texture is color keyed
-  bool IsColorKeyed() {return m_ColorKeyed;}
+  bool IsMipmapped() const;
+  void SetMipmapped(bool Mipmapped);
 
-  /// return the Keycolor
-  void GetKeyColor(float& r, float& g, float& b) {r=m_R;g=m_G;b=m_B;}
-
-  /// set the Keycolor
-  void SetKeyColor(float r, float g, float b) {m_R=r;m_G=g;m_B=b;m_ColorKeyed=true;}
-
-  /// return true, if this texture will be mipmapped
-  bool IsMipmapped() {return m_Mipmapped;}
-
-  /// decide, if this texture will be mipmapped
-  void SetMipmapped(bool Mipmapped) {m_Mipmapped = Mipmapped;}
-
-  /// set visible flag
-  void SetVisible (bool visible) { m_Visible = visible; }
 
   /// store this texture in zip?
-  void SetStored (bool stored) { m_Stored = stored; }
-
-  /// return true if this texture will be stored in zip
-  bool IsStored() {return m_Stored;}
+  void SetStored (bool stored);
+  bool IsStored() const;
 
 protected:
   /**

@@ -19,18 +19,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "cssysdef.h"
-
-#include "csutil/databuf.h"
-#include "igraphic/image.h"
-#include "igraphic/imageio.h"
-#include "iutil/comp.h"
-#include "iutil/eventh.h"
-#include "iutil/vfs.h"
-
-#include "mapstd.h"
 #include "texfile.h"
-#include "zipfile.h"
 
 static const char* InvisibleTextures[] =
 {
@@ -167,9 +156,99 @@ void CTextureFile::SetTexturename(const char* name)
     m_Stored = false;
 }
 
-bool CTextureFile::IsVisible()
+const char* CTextureFile::GetTexturename() const
+{
+  return m_Texturename.GetData();
+}
+
+
+void CTextureFile::SetFilename(const char* name) 
+{
+  m_Filename = name;
+}
+
+
+const char* CTextureFile::GetFilename() const
+{
+  return m_Filename.GetData();
+}
+
+
+void CTextureFile::SetOriginalSize(int w, int h)
+{
+  m_OriginalWidth = w; 
+  m_OriginalHeight = h;
+}
+
+
+int CTextureFile::GetOriginalWidth()
+{
+  return m_OriginalWidth;
+}
+
+
+int CTextureFile::GetOriginalHeight()
+{
+  return m_OriginalHeight;
+}
+
+
+bool CTextureFile::IsVisible() const
 {
   return m_Visible;
 }
 
+
+void CTextureFile::SetVisible (bool visible) 
+{ 
+  m_Visible = visible; 
+}
+
+
+bool CTextureFile::IsColorKeyed() const
+{
+  return m_ColorKeyed;
+}
+
+
+void CTextureFile::GetKeyColor(float& r, float& g, float& b) const
+{
+  r=m_R;
+  g=m_G;
+  b=m_B;
+}
+
+
+void CTextureFile::SetKeyColor(float r, float g, float b)
+{
+  m_R=r;
+  m_G=g;
+  m_B=b;
+
+  m_ColorKeyed=true;
+}
+
+
+bool CTextureFile::IsMipmapped() const 
+{
+  return m_Mipmapped;
+}
+
+
+void CTextureFile::SetMipmapped(bool Mipmapped) 
+{
+  m_Mipmapped = Mipmapped;
+}
+
+
+void CTextureFile::SetStored (bool stored) 
+{
+  m_Stored = stored; 
+}
+
+
+bool CTextureFile::IsStored() const
+{
+  return m_Stored;
+}
 

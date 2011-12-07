@@ -24,7 +24,6 @@
 #include "entity.h"
 #include "mparser.h"
 #include "brush.h"
-#include "mcurve.h"
 
 CMapKeyValuePair::CMapKeyValuePair(const char* key, const char* value)
 {
@@ -34,63 +33,71 @@ CMapKeyValuePair::CMapKeyValuePair(const char* key, const char* value)
   strcpy(m_Value, value);
 }
 
+
 CMapKeyValuePair::~CMapKeyValuePair()
 {
   delete [] m_Key;
   delete [] m_Value;
 }
 
+
+int CMapEntity::EntityCount = 0;
+
+
 CMapEntity::CMapEntity()
 {
-  static int EntityCount = 1;
-  csString Buffer;
-  Buffer.Format ("e%d", EntityCount++);
-  m_UniqueName = Buffer;
+  ++EntityCount;
+  m_UniqueName.Format ("e%d", EntityCount);
 }
+
 
 CMapEntity::~CMapEntity()
 {
-  DELETE_VECTOR_MEMBERS(m_Curves);
   DELETE_VECTOR_MEMBERS(m_Brushes);
   DELETE_VECTOR_MEMBERS(m_Keymap);
 }
 
-bool CMapEntity::Read(CMapParser* pParser, CMapFile* pMap)
+
+bool CMapEntity::Read(CMapParser* pParser, 
+                      CTexturedPlaneManager *tex_plane_manager)
 {
-  csString Buffer;
-  csString Key;
+  csString buffer;
+  csString key;
   bool finished = false;
 
   while (!finished)
   {
-    if (!pParser->GetSafeToken(Buffer)) return false;
-    if (strcmp(Buffer, "{") == 0)
+    if (!pParser->GetSafeToken(buffer))
     {
-      //This entity contains some brushes or curves!
-      //We need to decide now, what to read:
-      if (!pParser->PeekNextToken(Buffer)) return false;
-      if (strcmp(Buffer, "(") == 0)
+      return false;
+    }
+
+    if (buffer == "{")
+    {
+      if (!pParser->PeekNextToken(buffer)) 
       {
-        //Brush
-        CMapBrush* pBrush = new CMapBrush(this);
-        if (!pBrush->Read(pParser, pMap)) return false;
-        m_Brushes.Push(pBrush);
+        return false;
       }
-      else if (strcmp(Buffer, "patchDef2") == 0)
+
+      if (buffer == "(")
       {
-        //Curve
-        CMapCurve* pCurve = new CMapCurve;
-        if (!pCurve->Read(pParser, pMap)) return false;
-        m_Curves.Push(pCurve);
+        CMapBrush* pBrush = new CMapBrush();
+
+        if (!pBrush->Read(pParser, tex_plane_manager)) 
+        {
+          return false;
+        }
+
+        m_Brushes.Push(pBrush);
       }
       else
       {
-        pParser->ReportError("Format error! Expected either \"(\" or \"patchDef2\""
-                             ", Found\"%s\"", Buffer.GetData());
+        pParser->ReportError("Format error! Expected \"(\" "
+                             ", Found\"%s\"", buffer.GetData());
         return false;
       }
     }
-    else if (strcmp(Buffer, "}") == 0)
+    else if (buffer == "}")
     {
       //OK, we are done with this entity and it looks like
       //everything is ok
@@ -99,17 +106,20 @@ bool CMapEntity::Read(CMapParser* pParser, CMapFile* pMap)
     else
     {
       //Now this seems to be a key/ value pair
-      Key.Replace (Buffer);
-      if (!pParser->GetNextToken(Buffer))
+      key = buffer;
+
+      if (!pParser->GetNextToken(buffer))
       {
         pParser->ReportError("Format error. Keys and values for entities must"
-                             "always come in pairs. Found no match for key \"%s\"",
-                             Key.GetData());
+                             "always come in pairs. "
+                             "Found no match for key \"%s\"", key.GetData());
         return false;
       }
-      AddKeyValuePair(Key, Buffer);
+
+      AddKeyValuePair(key, buffer);
     }
   }
+
   return true;
 }
 

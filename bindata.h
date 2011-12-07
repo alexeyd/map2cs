@@ -22,6 +22,8 @@
 #ifndef __BINDATA_H__
 #define __BINDATA_H__
 
+#include <string.h>
+
 /**
   *
   */

@@ -37,7 +37,6 @@ class CdVector3;
 class CIPortal;
 class CIThing;
 class CISector;
-class CTextureArchive;
 class CTextureFile;
 class CMapCurve;
 class CMapCurvePoint;
@@ -56,7 +55,6 @@ CS_DECLARE_TYPED_VECTOR(CIPortalVector,          CIPortal);
 CS_DECLARE_TYPED_VECTOR(CIThingVector,           CIThing);
 CS_DECLARE_TYPED_VECTOR(CISectorVector,          CISector);
 CS_DECLARE_TYPED_VECTOR(CVector3Vector,          CdVector3);
-CS_DECLARE_TYPED_VECTOR(CTextureArchiveVector,   CTextureArchive);
 CS_DECLARE_TYPED_VECTOR(CTextureFileVector,      CTextureFile);
 CS_DECLARE_TYPED_VECTOR(CMapCurvePointVector,    CMapCurvePoint);
 CS_DECLARE_TYPED_VECTOR(CMapCurveVector,         CMapCurve);
@@ -73,3 +71,4 @@ CS_DECLARE_TYPED_VECTOR(CCharVector,             char);
    for (i=0;i<Num;i++) (DEST).Push(new TYPE(*((SRC)[i])));}
 
 #endif // __CONTAIN_H__
+

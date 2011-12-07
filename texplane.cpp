@@ -24,8 +24,7 @@
 #include "map.h"
 #include "texplane.h"
 
-CMapTexturedPlane::CMapTexturedPlane(CMapFile*,
-                                     CdVector3 v0, CdVector3 v1, CdVector3 v2,
+CMapTexturedPlane::CMapTexturedPlane(CdVector3 v0, CdVector3 v1, CdVector3 v2,
                                      CTextureFile* pTexture,
                                      double x_off, double y_off, double rot_angle,
                                      double x_scale, double y_scale,

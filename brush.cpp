@@ -74,10 +74,9 @@ bool CMapBrushBoundingBox::Intersects(CMapBrushBoundingBox* pOtherBox)
 }
 
 
-CMapBrush::CMapBrush(CMapEntity* pEntity)
+CMapBrush::CMapBrush()
 {
   m_Line    = 0;
-  m_pEntity = pEntity;
 }
 
 CMapBrush::~CMapBrush()
@@ -89,7 +88,8 @@ CMapBrush::~CMapBrush()
   }
 }
 
-bool CMapBrush::Read(CMapParser* pParser, CMapFile* pMap)
+bool CMapBrush::Read(CMapParser* pParser,
+                     CTexturedPlaneManager *tex_plane_manager)
 {
   csString Buffer;
   csString TextureName;
@@ -228,28 +228,28 @@ bool CMapBrush::Read(CMapParser* pParser, CMapFile* pMap)
           // numbers, but there are always three of them
           for (int i=0; i<3; i++)
           {
-	    bool malformed = false;
-	    bool intseen = false;
-	    char const* q = Buffer;
-	    while (*q != '\0' && isspace(*q))
-	      q++;
-	    while (*q != '\0' && isdigit(*q))
-	    {
-	      q++;
-	      intseen = true;
-	    }
-	    malformed = (*q != '\0' && !isspace(*q));
+        bool malformed = false;
+        bool intseen = false;
+        char const* q = Buffer;
+        while (*q != '\0' && isspace(*q))
+          q++;
+        while (*q != '\0' && isdigit(*q))
+        {
+          q++;
+          intseen = true;
+        }
+        malformed = (*q != '\0' && !isspace(*q));
 
-	    if (malformed || !intseen)
-	    {
-	      pParser->ReportError(
-		"Invalid Numeric format. Expected int, found \"%s\"", 
-		Buffer.GetData());
-		return false;
-	    }
+        if (malformed || !intseen)
+        {
+          pParser->ReportError(
+        "Invalid Numeric format. Expected int, found \"%s\"", 
+        Buffer.GetData());
+        return false;
+        }
 
             if (!pParser->GetSafeToken(Buffer))
-	      return false;
+          return false;
           }
         }
       }
@@ -269,12 +269,13 @@ bool CMapBrush::Read(CMapParser* pParser, CMapFile* pMap)
       {
         // Get a pointer to the plane. This can be either a new plane, or
         // a pointer to a similar plane, that already existed
-        CMapTexturedPlane* pPlane = pMap->AddPlane(v1, v2, v3, TextureName,
-                                                   x_off, y_off, rot_angle,
-                                                   x_scale, y_scale,
-						   v_tx_right, v_tx_up,
-                                                   QuarkModeTexture, QuarkMirrored,
-						   WC3MAP);
+        CMapTexturedPlane* pPlane = 
+          tex_plane_manager->AddPlane(v1, v2, v3, TextureName,
+                                      x_off, y_off, rot_angle,
+                                      x_scale, y_scale,
+                                      v_tx_right, v_tx_up,
+                                      QuarkModeTexture, QuarkMirrored,
+                                      WC3MAP);
         assert(pPlane);
 
         //Add that plane to the planes list.
@@ -353,3 +354,4 @@ bool CMapBrush::IsVisible()
 
   return false;
 }
+

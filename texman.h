@@ -22,30 +22,18 @@
 #ifndef __TEXMAN_H__
 #define __TEXMAN_H__
 
+#include "crystalspace.h"
+
+
 #include "contain.h"
-#include "csutil/ref.h"
+#include "texfile.h"
 
-class CMapFile;
-class CZipFile;
-class CTextureFile;
-struct iVFS;
 
-/**
-  *
-  */
 class CTextureManager
 {
 public:
-  /**
-    *
-    */
   CTextureManager();
-
-  /// The destructor, will do some cleanup, as usual.
   ~CTextureManager();
-
-  /// Load all the texture archive files, that are specified in the config file.
-  void LoadTextureArchives(CMapFile* pMap);
 
   /// Load all the texture archive files, that are specified in the config file.
   void LoadArchive (const char* filename);
@@ -65,18 +53,10 @@ public:
 protected:
   void CleanupTexturename (csString& Name);
 
-  /// A pointer to the global map.
-  CMapFile* m_pMap;
-
   /**
     * Here are all textures stored, that have already been extracted.
     */
   CTextureFileVector      m_StoredTextures;
-
-  /**
-    * Here are all Texture Archives being stored.
-    */
-  CTextureArchiveVector   m_TextureArchives;
 };
 
 #endif // __TEXMAN_H__

@@ -104,9 +104,6 @@ public:
   /// returns the Baseplane for this polygon
   CMapTexturedPlane* GetBaseplane() {return m_pBaseplane;}
 
-  /// returns the pointer to the defining entity
-  CMapEntity*        GetEntity();
-
 protected:
   /**
     * Finds two planes, who will create a valid point of the polygon. If there

@@ -26,104 +26,39 @@
 #include "mparser.h"
 #include "texplane.h"
 #include "mpoly.h"
-#include "zipfile.h"
-#include "csutil/cfgfile.h"
 
 CMapFile::CMapFile()
 {
-  m_pConfigFile    = new csConfigFile;
-  m_IniFilename = 0;
   m_NumBrushes  = 0;
 }
+
 
 CMapFile::~CMapFile()
 {
-  DELETE_VECTOR_MEMBERS(m_Planes);
   DELETE_VECTOR_MEMBERS(m_Entities);
-
-  m_pConfigFile->Save (m_IniFilename);
-
-  delete m_pConfigFile;
-  delete m_IniFilename;
 }
 
-bool CMapFile::Read(const char* filename, const char* configfile)
+
+bool CMapFile::Read(const char* filename)
 {
-  m_IniFilename = strdup(configfile);
-  m_pConfigFile->Load (configfile);
-  m_TextureManager.LoadTextureArchives(this);
+  CMapParser parser;
+  csString buffer;
 
   m_NumBrushes  = 0;
 
-  /***********************
-  Kind of sloppy, ill find
-  a nicer way to do it in 
-  the future!
-  ***********************/
-
-  CMapParser preParser;
-  if (!preParser.Open(filename)) return false;
-
-  bool inBrush = false;
-
-  csString Buff, Key, Value;
-  while (preParser.GetNextToken(Buff))
+  if (!parser.Open(filename))
   {
-    if (strcmp(Buff, "{")==0) 
-    {
-      //new entity//
-      while (preParser.GetNextToken(Buff)) 
-      {	
-	if (strcmp(Buff, "}")==0) 
-	{
-	  //end of entity or brush//
-	  if (inBrush)
-	    inBrush = false;
-	  else
-	    break;
-	} 
-	else if (strcmp(Buff, "{")==0) 
-	{
-	  //Beginning of brush//
-	  inBrush = true;
-	}
-	else if (strcmp(Buff, "{")==0)
-	{
-	  //Info in a brush//
-	}
-	else
-	{
-	  //Key Pair//
-	  Key.Replace (Buff);
-	  if (strcmp(Key, "archive")==0) 
-	  {
-	    if (!preParser.GetNextToken (Buff))
-	    {
-	      preParser.ReportError("Format error. Keys and values for entities must"
-			    "always come in pairs. Found no match for key \"%s\"",
-			    Key.GetData());
-	      return false;
-	    }
-	    Value.Replace (Buff);
-	    m_TextureManager.LoadArchive (Value);
-	  }
-	}
-      }
-    }
+    return false;
   }
 
-  CMapParser parser;
-  if (!parser.Open(filename)) return false;
 
-  csString Buffer;
-
-  while (parser.GetNextToken(Buffer))
+  while (parser.GetNextToken(buffer))
   {
-    if (strcmp(Buffer, "{") == 0)
+    if (strcmp(buffer, "{") == 0)
     {
       //a new entity follows.
       CMapEntity* pEntity = new CMapEntity;
-      if (!pEntity->Read(&parser, this))
+      if (!pEntity->Read(&parser, &m_tex_plane_manager))
       {
         return false;
       }
@@ -132,8 +67,9 @@ bool CMapFile::Read(const char* filename, const char* configfile)
     }
     else
     {
-      parser.ReportError("Format error! Expected an entity, that starts with \"{\" "
-                         "but found \"%s\"", Buffer.GetData());
+      parser.ReportError("Format error! Expected an entity, "
+                         "that starts with \"{\" "
+                         "but found \"%s\"", buffer.GetData());
       return false;
     }
   }
@@ -141,92 +77,21 @@ bool CMapFile::Read(const char* filename, const char* configfile)
   csPrintf("Map contains:\n");
   csPrintf("%zu Entites\n", m_Entities.GetSize());
   csPrintf("%zu Brushes\n", m_NumBrushes);
-  csPrintf("%zu Unique planes\n", m_Planes.GetSize());
-  return true;
-}
-
-bool CMapFile::WriteTextureinfo()
-{
-  m_pConfigFile->Save (m_IniFilename);
 
   return true;
 }
 
-CMapTexturedPlane* CMapFile::AddPlane(CdVector3 v1, CdVector3 v2, CdVector3 v3,
-                                      const char* TextureName,
-                                      double x_off, double y_off,
-                                      double rot_angle,
-                                      double x_scale, double y_scale,
-				      CdVector3 v_tx_right, CdVector3 v_tx_up,
-                                      bool QuarkModeTexture,
-                                      bool QuarkMirrored,
-				      bool HLTexture)
-{
-  CTextureFile* pTexture = m_TextureManager.GetTexture(TextureName);
-  if (!pTexture)
-  {
-    csPrintf("Fatal error: Texture '%s', not found! aborting!\n", TextureName);
-    exit(1);
-  }
-
-  CMapTexturedPlane* pNewPlane =
-    new CMapTexturedPlane(this, v1, v2, v3, pTexture, x_off,
-                          y_off, rot_angle, x_scale, y_scale,
-			  v_tx_right, v_tx_up,
-                          QuarkModeTexture, QuarkMirrored,
-			  HLTexture);
-  return AddPlane(pNewPlane);
-}
-
-CMapTexturedPlane* CMapFile::AddPlane(CdVector3 v1, CdVector3 v2, CdVector3 v3,
-                                      int r, int g, int b)
-{
-  CMapTexturedPlane* pNewPlane = new CMapTexturedPlane(v1, v2, v3, r, g, b);
-  return AddPlane(pNewPlane);
-}
-
-CMapTexturedPlane* CMapFile::AddPlane(CMapTexturedPlane* pNewPlane)
-{
-  //first we look in m_Planes to check, if a similar plane is already stored.
-  size_t i, NumPlanes = m_Planes.GetSize();
-  for (i=0; i<NumPlanes; i++)
-  {
-    CMapTexturedPlane* pPlane = m_Planes[i];
-    assert(pPlane);
-
-    if (pPlane->IsEqual(pNewPlane))
-    {
-      //That plane is already stored. So we return a pointer to it.
-      delete pNewPlane;
-      return pPlane;
-    }
-  }
-
-  //There is no such plane, so we will add the new plane.
-  m_Planes.Push(pNewPlane);
-
-  //Create a mirror plane for this plane.
-  CMapTexturedPlane* pMirrorPlane = new CMapTexturedPlane(pNewPlane, true);
-
-  //Add the mirror plane too.
-  m_Planes.Push(pMirrorPlane);
-
-  //Set Mirrorinfo to both planes.
-  pNewPlane->   SetMirror(pMirrorPlane);
-  pMirrorPlane->SetMirror(pNewPlane);
-
-  //return the unmirrored plane.
-  return pNewPlane;
-}
 
 void CMapFile::CreatePolygons()
 {
   size_t i;
+
   for (i=0; i<m_Entities.GetSize(); i++)
   {
     m_Entities[i]->CreatePolygons();
   }
 }
+
 
 void CMapFile::GetMapSize(CdVector3& Min, CdVector3& Max)
 {
@@ -307,128 +172,3 @@ void CMapFile::GetMapSize(CdVector3& Min, CdVector3& Max)
   } //for entity
 }
 
-CTextureFile* CMapFile::GetTexture(const char* TextureName)
-{
-  return m_TextureManager.GetTexture(TextureName);
-}
-
-/*
-bool CMapFile::AddTexture(const char* TextureName, CZipFile* pZipFile)
-{
-  char* pData;
-  int   Size;
-  char simplename[256];
-  char fullname[256];
-  strcpy(simplename, TextureName);
-  int len = strlen(simplename);
-  if (len > 4 && simplename[len-4] == '.')
-  {
-    //remove the extension ".bmp"
-    simplename[len-4] = 0;
-  }
-
-  for (int i=0; i<m_Wads.GetSize(); i++)
-  {
-    if (m_Wads[i]->Extract(simplename, pData, Size))
-    {
-      bool ok = pZipFile->AddData(pData, Size, TextureName);
-      delete[] pData;
-      return ok;
-    }
-  }
-
-  if (FindTextureFile(TextureName, fullname))
-  {
-    if (pZipFile->AddFile(fullname, TextureName))
-    {
-      return true;
-    }
-    else
-    {
-      csPrintf("Can't add '%s' to Archive! Aborting!\n", TextureName);
-      return false;
-    }
-  }
-  else
-  {
-    return false;
-  }
-}
-
-bool CMapFile::FindTextureFile(const char* name, char* fullname)
-{
-  for (int pathnr = 1; true; pathnr++)
-  {
-    csString keyname;
-    char Path[256];
-    keyname.Format ("path%d", pathnr);
-    strcpy(Path, GetIniStr("texturesettings", keyname, ""));
-    if (Path[0])
-    {
-      csString Buffer;
-      Buffer.Format ("%s/%s", Path, name);
-      FILE* fd = fopen(Buffer, "r");
-      if (fd)
-      {
-        fclose(fd);
-        strcpy(fullname, Buffer);
-        return true;
-      }
-    }
-    else
-    {
-      return false;
-    }
-  }
-}
-*/
-
-int CMapFile::GetConfigInt(const char* Path, int def)
-{
-  assert(m_pConfigFile);
-  return m_pConfigFile->GetInt(Path, def);
-}
-
-double CMapFile::GetConfigFloat(const char* Path, double def)
-{
-  assert(m_pConfigFile);
-  return m_pConfigFile->GetFloat(Path, def);
-}
-
-const char* CMapFile::GetConfigStr(const char* Path, const char* def)
-{
-  assert(m_pConfigFile);
-  return m_pConfigFile->GetStr(Path, def);
-}
-
-/*
-void CMapFile::LoadWadFiles()
-{
-  int wadnr = 1;
-  do
-  {
-    csString keyname;
-    char wadname[300];
-    keyname.Format ("wad%d", wadnr);
-    strcpy(wadname, GetIniStr("texturesettings", keyname, ""));
-    if (wadname[0])
-    {
-      wadnr++;
-      CWad3File* pWad = new CWad3File;
-      if (pWad->Open(wadname))
-      {
-        m_Wads.Push(pWad);
-      }
-      else
-      {
-        delete pWad;
-      }
-    }
-    else
-    {
-      wadnr = -1;
-    }
-  }
-  while (wadnr>0);
-}
-*/

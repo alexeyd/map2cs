@@ -71,7 +71,8 @@ public:
     * was an error, it will return false. In that case you should not
     * continue reading the file.
     */
-  bool Read(CMapParser* pParser, CMapFile* pMap);
+  bool Read(CMapParser* pParser,
+            CTexturedPlaneManager *tex_plane_manager);
 
   /**
     * Creates the polygons for all brushes.
@@ -82,9 +83,6 @@ public:
   size_t     GetNumBrushes()     {return m_Brushes.GetSize();}
   CMapBrush* GetBrush(size_t index) {return m_Brushes.Get(index);}
 
-  /// Access all curves from outside
-  size_t     GetCurveCount()      {return m_Curves.GetSize();}
-  CMapCurve* GetCurve(size_t index) {return m_Curves.Get(index);}
 
   /**
     * Get the classname of this entity or "", if this entity has no
@@ -105,50 +103,21 @@ public:
     */
   bool GetOrigin(CdVector3& v);
 
-  /**
-    * Get the string value of the given key. If the given key is not present this
-    * function will return the given defaultvalue (0 if nothing is given)
-    */
+
   const char* GetValueOfKey(const char* key, const char* defaultvalue = 0);
-
-  /**
-    * Get the numeric value of the given key. If the given key is not present this
-    * function will return the given defaultvalue (0.0 if nothing is given)
-    */
   double GetNumValueOfKey(const char* key, double defaultvalue = 0.0);
-
-  /**
-    * Get the numeric value of the given key. If the given key is not present this
-    * function will not alter V1, v2 and v3 and will return false. Otherwise it sets
-    * v1, v2 and v3 to the values of the key and returns true.
-    */
-  bool GetTripleNumValueOfKey(const char* key, double& v1, double& v2, double& v3);
-
-  /**
-    * Get the boolean value of the given key. If the given key is not present this
-    * function will return the given defaultvalue (false if nothing is given)
-    */
+  bool GetTripleNumValueOfKey(const char* key, double& v1, 
+                              double& v2, double& v3);
   bool GetBoolValueOfKey(const char* key, bool defaultvalue = false);
 
-  /// Get the number of Key/Value pairs
+
   size_t GetNumberOfKeyValuePairs() {return m_Keymap.GetSize();}
-
-  /// Get the key value pair at the given index (0..GetNumberOfKeyValuePairs()-1)
   CMapKeyValuePair* GetKeyValuePair(size_t index) {return m_Keymap[index];}
+
 protected:
-  /**
-    * Here are all contained brushes stored.
-    */
+  static int EntityCount;
+
   CMapBrushVector        m_Brushes;
-
-  /**
-    * Here are all contained curves stored.
-    */
-  CMapCurveVector        m_Curves;
-
-  /**
-    * Here are all Key/ Value pairs stored.
-    */
   CMapKeyValuePairVector m_Keymap;
 
   /**

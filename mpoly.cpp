@@ -337,11 +337,6 @@ void CMapPolygon::FlipSide()
   }
 }
 
-CMapEntity* CMapPolygon::GetEntity()
-{
-  assert(m_pBrush);
-  return m_pBrush->GetEntity();
-}
 
 void CMapPolygon::GetStartplanes(const CMapTexturedPlaneVector& planes,
                                  CMapTexturedPlane*&            pPlane1,

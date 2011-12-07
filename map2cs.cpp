@@ -25,7 +25,6 @@
 #include "mapstd.h"
 #include "map.h"
 #include "cworld.h"
-#include "wad3file.h"
 #include "iutil/plugin.h"
 #include "iutil/objreg.h"
 #include "iutil/document.h"
@@ -47,7 +46,7 @@ void PrintSyntax()
 {
   csPrintf("map2cs is a utility program to convert a MAP file to a Crystal Space level\n\n");
 
-  csPrintf("syntax: map2cs <mapfile> <worldfile> [configfile]\n");
+  csPrintf("syntax: map2cs <mapfile> <worldfile>\n");
 
   csPrintf("for example: map2cs sample.map data/sample.zip sample.cfg\n");
   csPrintf("             to create the CS level called sample.zip from sample.map\n");
@@ -86,39 +85,19 @@ int appMain (iObjectRegistry* object_reg, int argc, char *argv[])
   csPrintf("This is free software, and you are welcome to redistribute it under certain\n");
   csPrintf("conditions; see `COPYING' for details.\n\n");
 
-  if (argc < 3 || argc > 4)
+  if (argc != 3)
   {
     PrintSyntax();
     return 1;
   }
   
-  const char* configfile;
-  if (argc==4)
-  {
-    configfile = argv[3];
-  }
-  else
-  {
-    char* filename = new char[255];
-    const char* crystal = getenv("CRYSTAL");
-    if (!crystal)
-    {
-      csPrintf ("Couldn't find Crystal Space directory (CRYSTAL var)! Using current dir!\n");
-      strcpy (filename, "data/config/map2cs.cfg");
-    }
-    else
-    {
-      strcpy (filename, crystal);
-      strcat (filename, "/data/config/map2cs.cfg");
-    }
-    configfile=filename;
-  }
+
   const char* mapfile   = argv[1];
   const char* worldfile = argv[2];
 
   CMapFile Map;
   csPrintf("Reading map '%s'...\n", mapfile);
-  if (!Map.Read(mapfile, configfile))
+  if (!Map.Read(mapfile))
     return 2;
 
   Map.CreatePolygons();
@@ -138,14 +117,6 @@ int appMain (iObjectRegistry* object_reg, int argc, char *argv[])
   VFS->Mount ("/map2cs_temp", worldfile);
   csPrintf ("Writing world...\n");
   doc->Write(VFS, "/map2cs_temp/world");
-
-/*  csPrintf ("Writing textures...\n");
-  if (!Map.GetTextureManager()->AddAllTexturesToVFS (VFS,
-    "/map2cs_temp/"))
-  {
-    csPrintf ("Not all textures where written correctly.\n");
-  }
-*/
 
   VFS->Unmount ("/map2cs_temp", worldfile);
 

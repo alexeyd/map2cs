@@ -23,18 +23,8 @@
 #define __MAP_H__
 
 #include "contain.h"
-#include "texman.h"
+#include "planeman.h"
 
-class csConfigFile;
-class CZipFile;
-
-struct TextureInfo
-{
-  csString FileName;
-  int      SizeX;
-  int      SizeY;
-  bool     WadTexture;
-};
 
 /**
   * This is the main class to manage all information found within
@@ -72,35 +62,8 @@ public:
     * This method can currently be called only once for every instance
     * of this class. Otherwise, you will merge both map files.
     */
-  bool Read(const char* filename, const char* configfile);
+  bool Read(const char* filename);
 
-  /**
-    * Writes all the missing textures to the configfile.
-    */
-  bool WriteTextureinfo();
-
-  /**
-    * This method will look for the given Plane in the Plane List.
-    * If a similar Plane (Same position Texture and Texture alignment)
-    * is found, it will return a pointer the the already available
-    * plane otherwise it will create a new plane and return a pointer
-    * to that plane.
-    */
-  CMapTexturedPlane* AddPlane(CdVector3 v1, CdVector3 v2, CdVector3 v3,
-                              const char* TextureName,
-                              double x_off, double y_off,
-                              double rot_angle,
-                              double x_scale, double y_scale,
-			      CdVector3 v_tx_right, CdVector3 v_tx_up,
-                              bool QuarkModeTexture,
-                              bool QuarkMirrored,
-			      bool HLTexture);
-
-  /**
-    * Adds a flatshaded plane. the given values are the color components
-    */
-  CMapTexturedPlane* AddPlane(CdVector3 v1, CdVector3 v2, CdVector3 v3,
-                              int r, int g, int b);
 
   /**
     * Make all entities create their polygons.
@@ -116,11 +79,6 @@ public:
     */
   void GetMapSize(CdVector3& Min, CdVector3& Max);
 
-  /**
-    * Get the TextureFile for the given original Texture name. If the texture
-    * is not found, it will return 0.
-    */
-  CTextureFile* GetTexture(const char* TextureName);
 
   /// Get the number of all contained entities
   size_t         GetNumEntities()     {return m_Entities.GetSize();}
@@ -128,37 +86,9 @@ public:
   /// Get the specified entity
   CMapEntity* GetEntity(size_t index) {return m_Entities.Get(index);}
 
-  /// Get the number of the contained planes
-  size_t         GetPlaneCount()      {return m_Planes.GetSize();}
-
-  /// Get the specified plane
-  CMapTexturedPlane* GetPlane(size_t index) {return m_Planes.Get(index);}
 
   /// Get the total number of brushes in this map
   size_t GetNumBrushes() {return m_NumBrushes;}
-
-  /// Get a pointer to the Config File
-  csConfigFile* GetConfigFile() {return m_pConfigFile;}
-
-  CTextureManager* GetTextureManager() {return &m_TextureManager;}
-
-  /**
-    * Get an integer value from the configuration instance.
-    * (Store the default if the key is not found)
-    */
-  int   GetConfigInt   (const char *Path, int def = 0);
-
-  /**
-    * Get a real value from the configuration instance.
-    * (Store the default if the key is not found)
-    */
-  double GetConfigFloat (const char *Path, double def = 0.0);
-
-  /**
-    * Get a string value from the configuration instance.
-    * (Store the default if the key is not found)
-    */
-  const char *GetConfigStr (const char *Path, const char *def = "");
 
 protected:
   /**
@@ -169,36 +99,11 @@ protected:
     */
   bool FindTextureFile(const char* name, char* fullname);
 
-  /**
-    * Add a CMapTexturedPlane object to the Map. (If a similar plane already exists,
-    * the given plane is deleted!)
-    */
-  CMapTexturedPlane* AddPlane(CMapTexturedPlane* pNewPlane);
-protected:
-  /**
-    * Here all the possible planes are stored. Note, that this will be
-    * all unique planes.
-    */
-  CMapTexturedPlaneVector m_Planes;
 
-  /**
-    * Here all entities are being stored.
-    */
+protected:
   CMapEntityVector        m_Entities;
 
-  /**
-    * The texture manager takes care of texture information
-    */
-  CTextureManager         m_TextureManager;
-
-  /**
-    * This is the configuration file, that will control the conversion
-    * process.
-    */
-  csConfigFile* m_pConfigFile;
-
-  ///remember the name of the Inifile here
-  char* m_IniFilename;
+  CTexturedPlaneManager    m_tex_plane_manager;
 
   /// For statistics: How many Brushes are in this map.
   size_t m_NumBrushes;

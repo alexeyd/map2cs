@@ -23,6 +23,7 @@
 #define __TEXPLANE_H__
 
 #include "texfile.h"
+#include "dmath3d.h"
 
 class CMapFile;
 
@@ -49,8 +50,7 @@ public:
     * y_off, rot_angle, x_scale, y_scale will be ignored and
     * v0, v1 and v2 will be used to define the texture.
     */
-  CMapTexturedPlane(CMapFile* pMap,
-                    CdVector3 v0, CdVector3 v1, CdVector3 v2,
+  CMapTexturedPlane(CdVector3 v0, CdVector3 v1, CdVector3 v2,
                     CTextureFile* pTexture,
                     double x_off, double y_off, double rot_angle,
                     double x_scale, double y_scale,
