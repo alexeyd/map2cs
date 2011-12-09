@@ -58,102 +58,16 @@ static const char* UnstoredTextures[] =
 
 CTextureFile::CTextureFile()
 {
-  m_OriginalWidth  = 1;
-  m_OriginalHeight = 1;
-  m_Visible        = false;
-  m_ColorKeyed     = false;
-  m_Mipmapped      = true;
-  m_R              = 0.0f;
-  m_G              = 0.0f;
-  m_B              = 0.0f;
-  m_Stored	   = false;
 }
 
 CTextureFile::~CTextureFile()
 {
 }
 
-extern iImageIO* ImageLoader;
-
-void CTextureFile::SetOriginalData(char* Data, int Size)
-{
-  m_OriginalData.SetData(Data, Size);
-  if (Data && Size && ImageLoader)
-  {
-    csRef<iDataBuffer> buf;
-    buf.AttachNew (new csDataBuffer (Data, Size, false));
-    csRef<iImage> ifile (ImageLoader->Load (buf, CS_IMGFMT_TRUECOLOR));
-    if (ifile)
-    {
-      m_OriginalWidth  = ifile->GetWidth();
-      m_OriginalHeight = ifile->GetHeight();
-    }
-  }
-}
-
-bool CTextureFile::AddToVFS(csRef<iVFS> VFS, const char* path)
-{
-  if (m_OriginalData.GetSize() == 0) return true;
-  VFS->PushDir();
-  VFS->ChDir (path);
-  bool res = false;
-  if (VFS->Exists (m_Filename))
-  {
-    size_t vfssize;
-    VFS->GetFileSize (m_Filename, vfssize);
-    if (vfssize == (size_t) m_OriginalData.GetSize())
-    {
-      res = true;
-    }
-    else
-    {
-      csPrintf ("Texture %s: file %s already exists, but has different size (%zu != %d).\n"
-	"Maybe a texture with this name exists in multiple archives?\n",
-	(const char*) m_Texturename, 
-	(const char*) m_Filename, vfssize, m_OriginalData.GetSize());
-    }
-  }
-  else
-  {
-    VFS->WriteFile (m_Filename, (char*)m_OriginalData.GetData(),
-      m_OriginalData.GetSize());
-    res = true;
-  }
-  VFS->PopDir ();
-  return res;
-//  return pZipfile->AddData(&m_OriginalData, m_Filename);
-}
 
 void CTextureFile::SetTexturename(const char* name)
 {
   m_Texturename = name;
-
-  m_Visible = true;
-  int i;
-  for (i=0; i<int(sizeof(InvisibleTextures)/sizeof(InvisibleTextures[0])); i++)
-  {
-    if (strcasecmp (m_Texturename, InvisibleTextures[i])==0)
-    {
-      m_Visible = false;
-      break;
-    }
-  }
-
-  if (m_Visible)
-  {
-    m_Stored = true;
-    int i;
-    for (i=0; i<int(sizeof(UnstoredTextures)/sizeof(UnstoredTextures[0])); i++)
-    {
-      if (strcasecmp(m_Texturename, UnstoredTextures[i])==0)
-      {
-	m_Stored = false;
-	break;
-      }
-    }
-  }
-  else
-    m_Stored = false;
 }
 
 const char* CTextureFile::GetTexturename() const
@@ -173,82 +87,14 @@ const char* CTextureFile::GetFilename() const
   return m_Filename.GetData();
 }
 
-
-void CTextureFile::SetOriginalSize(int w, int h)
+int CTextureFile::GetOriginalWidth() const
 {
-  m_OriginalWidth = w; 
-  m_OriginalHeight = h;
+  return 128;
 }
 
 
-int CTextureFile::GetOriginalWidth()
+int CTextureFile::GetOriginalHeight() const
 {
-  return m_OriginalWidth;
-}
-
-
-int CTextureFile::GetOriginalHeight()
-{
-  return m_OriginalHeight;
-}
-
-
-bool CTextureFile::IsVisible() const
-{
-  return m_Visible;
-}
-
-
-void CTextureFile::SetVisible (bool visible) 
-{ 
-  m_Visible = visible; 
-}
-
-
-bool CTextureFile::IsColorKeyed() const
-{
-  return m_ColorKeyed;
-}
-
-
-void CTextureFile::GetKeyColor(float& r, float& g, float& b) const
-{
-  r=m_R;
-  g=m_G;
-  b=m_B;
-}
-
-
-void CTextureFile::SetKeyColor(float r, float g, float b)
-{
-  m_R=r;
-  m_G=g;
-  m_B=b;
-
-  m_ColorKeyed=true;
-}
-
-
-bool CTextureFile::IsMipmapped() const 
-{
-  return m_Mipmapped;
-}
-
-
-void CTextureFile::SetMipmapped(bool Mipmapped) 
-{
-  m_Mipmapped = Mipmapped;
-}
-
-
-void CTextureFile::SetStored (bool stored) 
-{
-  m_Stored = stored; 
-}
-
-
-bool CTextureFile::IsStored() const
-{
-  return m_Stored;
+  return 128;
 }
 

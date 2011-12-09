@@ -35,14 +35,8 @@ public:
   CTextureManager();
   ~CTextureManager();
 
-  /// Load all the texture archive files, that are specified in the config file.
-  void LoadArchive (const char* filename);
-
   /// Find the required Texture, and return a pointer to it.
   CTextureFile* GetTexture(const char* TextureName);
-
-  /// Adds all textures to the given Zipfile
-  bool AddAllTexturesToVFS(csRef<iVFS> VFS, const char* path);
 
   /// returns the Number of known textures
   size_t GetTextureCount() { return m_StoredTextures.GetSize(); }

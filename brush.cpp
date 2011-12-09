@@ -345,13 +345,6 @@ void CMapBrush::IntersectWithPlane(CMapTexturedPlane* pIntersectplane,
 
 bool CMapBrush::IsVisible()
 {
-  size_t k, NumPlanes = m_Planes.GetSize();
-  for (k=0; k<NumPlanes; k++)
-  {
-    CMapTexturedPlane* pPlane = m_Planes[k];
-    if (pPlane->GetTexture()->IsVisible()) return true;
-  }  //for (k)
-
-  return false;
+  return true;
 }
 

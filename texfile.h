@@ -25,9 +25,6 @@
 #include "crystalspace.h"
 #include "csutil/ref.h"
 
-#include "bindata.h"
-
-
 /**
   *
   */
@@ -43,30 +40,8 @@ public:
   void SetFilename(const char* name);
   const char* GetFilename() const;
 
-  void SetOriginalSize(int w, int h);
-  int GetOriginalWidth();
-  int GetOriginalHeight();
-
-  bool IsVisible() const;
-  void SetVisible (bool visible);
-
-  bool IsColorKeyed() const;
-  void GetKeyColor(float& r, float& g, float& b) const;
-  void SetKeyColor(float r, float g, float b);
-
-
-  bool AddToVFS(csRef<iVFS> VFS, const char* path);
-
-  void SetOriginalData(char* Data, int Size);
-
-
-  bool IsMipmapped() const;
-  void SetMipmapped(bool Mipmapped);
-
-
-  /// store this texture in zip?
-  void SetStored (bool stored);
-  bool IsStored() const;
+  int GetOriginalWidth() const;
+  int GetOriginalHeight() const;
 
 protected:
   /**
@@ -83,34 +58,6 @@ protected:
     * Texture name, but it could well be a name like "tex00001.jpg"
     */
   csString m_Filename;
-
-  /**
-    * Here is the original Data being stored. This is a simple copy of the file
-    * on Disk. It can be added to the Worldfile, if no further processing like
-    * scaling is required.
-    */
-  CBinaryData m_OriginalData;
-
-  /// the original width of the texture (before scaling)
-  int m_OriginalWidth;
-
-  /// the original height of the texture (before scaling)
-  int m_OriginalHeight;
-
-  /// false, if this texture is not to be displayed
-  bool m_Visible;
-
-  /// true, if this texture has a keycolor
-  bool m_ColorKeyed;
-
-  /// true, if this texture is mipmapped
-  bool m_Mipmapped;
-
-  /// The Keycolor if m_ColorKeyed is true;
-  float m_R, m_G, m_B;
-
-  /// store on disk?
-  bool m_Stored;
 };
 
 #endif // __TEXFILE_H__

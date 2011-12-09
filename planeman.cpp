@@ -34,11 +34,7 @@ CTexturedPlaneManager::AddPlane(CdVector3 v1, CdVector3 v2, CdVector3 v3,
   CMapTexturedPlane* pNewPlane = new CMapTexturedPlane(v1, v2, v3, 
                                                        texture, x_off, y_off, 
                                                        rot_angle, 
-                                                       x_scale, y_scale,
-                                                       v_tx_right, v_tx_up,
-                                                       QuarkModeTexture, 
-                                                       QuarkMirrored,
-                                                       HLTexture);
+                                                       x_scale, y_scale);
   return AddPlane(pNewPlane);
 }
 

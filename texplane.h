@@ -53,10 +53,7 @@ public:
   CMapTexturedPlane(CdVector3 v0, CdVector3 v1, CdVector3 v2,
                     CTextureFile* pTexture,
                     double x_off, double y_off, double rot_angle,
-                    double x_scale, double y_scale,
-		    CdVector3 v_tx_right, CdVector3 v_tx_u,
-                    bool QuarkModeTexture, bool QuarkMirrored,
-		    bool HLTexture);
+                    double x_scale, double y_scale);
 
   /**
     * Constructs a Plane from the given color
