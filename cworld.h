@@ -24,6 +24,7 @@
 #define __CWORLD_H__
 
 #include "crystalspace.h"
+#include "dmath3d.h"
 #include "map.h"
 #include "brush.h"
 #include "entity.h"

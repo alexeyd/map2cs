@@ -96,18 +96,32 @@ void CCSWorld::CreateMeshFromBrush(CMapBrush *brush, csString name)
   factstate->SetVertexCount(brush->GetPolygonCount() * 3);
   factstate->SetTriangleCount(brush->GetPolygonCount());
 
-  for(i = 0; i < polygon_num; ++i)
+  int pc = 0; // polygon count
+
+  for(i = 0; i < subbrushes.GetSize(); ++i)
   {
-    polygon = brush->GetPolygon(i);
+    subbrush = &( subbrushes.Get(i) );
 
-    factstate->GetVertices()[i*3].Set (-0.1, 0.1, 0.1);
-    factstate->GetTexels()  [i*3].Set (0, 0);
+    for(j = 0; j < subbrush->m_polygons.GetSize(); ++j)
+    {
+      polygon = subbrush->m_polygons.Get(j);
+      CdVector3 v1, v2, v3;
 
-    factstate->GetVertices()[i*3 + 1].Set (-0.1, 0.1, 0.1);
-    factstate->GetTexels()  [i*3 + 1].Set (0, 0);
+      v1 = polygon->GetVertex(0);
+      v2 = polygon->GetVertex(1);
+      v3 = polygon->GetVertex(2);
 
-    factstate->GetVertices()[i*3 + 2].Set (-0.1, 0.1, 0.1);
-    factstate->GetTexels()  [i*3 + 2].Set (0, 0);
+      factstate->GetVertices()[pc*3].Set (v1.x, v1.y, v1.z);
+      factstate->GetTexels()  [pc*3].Set (0, 0);
+     
+      factstate->GetVertices()[pc*3 + 1].Set (v2.x, v2.y, v2.z);
+      factstate->GetTexels()  [pc*3 + 1].Set (0, 0);
+     
+      factstate->GetVertices()[pc*3 + 2].Set (v3.x, v3.y, v3.z);
+      factstate->GetTexels()  [pc*3 + 2].Set (0, 0);
+
+      ++pc;
+    }
   }
 
   for(i = 0; i < polygon_num; ++i)
