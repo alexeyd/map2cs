@@ -69,9 +69,9 @@ CFLAGS.I = -I
 # Flags for compiler and linker.
 # Make sure to update the required libraries for your own project
 #------
-CFLAGS := $(shell cs-config --cflags)
-CXXFLAGS := $(shell cs-config --cxxflags)
-LINKFLAGS := $(shell cs-config --libs crystalspace)
+CFLAGS := $(shell cs-config --cflags) -g
+CXXFLAGS := $(shell cs-config --cxxflags) -g
+LINKFLAGS := $(shell cs-config --libs crystalspace) -g
 
 DO.SHARED.PLUGIN.CORE=$(LINK) $(LFLAGS.DLL) -o $@ $^ $(PLUGIN.POSTFLAGS)
 DO.PLUGIN = \

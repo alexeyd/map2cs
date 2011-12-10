@@ -45,6 +45,7 @@ class CCSWorld
 
     iObjectRegistry* m_object_reg;
     csRef<iEngine> m_engine;
+    csRef<iSector> m_sector;
 };
 
 #endif // __CWORLD_H__

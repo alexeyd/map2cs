@@ -25,6 +25,7 @@ CCSWorld::CCSWorld(iObjectRegistry *object_reg)
 {
   m_object_reg = object_reg;
   m_engine = csQueryRegistry<iEngine>(m_object_reg);
+  m_sector = m_engine->CreateSector("scene");
 }
 
 CCSWorld::~CCSWorld()
@@ -187,8 +188,7 @@ void CCSWorld::CreateMeshFromBrush(CMapBrush *brush, csString name)
   csRef<iMeshWrapper> mesh =
     m_engine->CreateMeshWrapper (fact, mesh_name.GetData());
 
-  csRef<iGeneralMeshState> meshstate = 
-    scfQueryInterface<iGeneralMeshState> (mesh->GetMeshObject());
+  mesh->GetMovable()->SetPosition(m_sector, csVector3(0.0, 0.0, 0.0));
 }
 
 
