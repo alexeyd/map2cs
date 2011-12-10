@@ -180,7 +180,16 @@ void CCSWorld::CreateMeshFromBrush(CMapBrush *brush, csString name)
 
     indices_buffer->CopyInto( &(indices.Get(0)), indices.GetSize() );
 
-    factstate->AddSubMesh(indices_buffer, NULL, "");
+    iMaterialWrapper *material;
+
+    material = m_engine->FindMaterial(subbrush->m_texture_name);
+
+    if(!material)
+    {
+      material = m_engine->CreateMaterial(subbrush->m_texture_name, NULL);
+    }
+
+    factstate->AddSubMesh(indices_buffer, material, "");
   }
 
   factstate->CalculateNormals();
