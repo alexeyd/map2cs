@@ -43,6 +43,7 @@ class CCSWorld
   private:
     void CreateMeshFromBrush(CMapBrush *brush, csString name);
     void AddLight(CMapEntity *entity);
+    void AddStart(CMapEntity *entity);
 
     iObjectRegistry* m_object_reg;
     csRef<iEngine> m_engine;

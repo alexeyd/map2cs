@@ -229,6 +229,29 @@ void CCSWorld::AddLight(CMapEntity *entity)
 }
 
 
+void CCSWorld::AddStart(CMapEntity *entity)
+{
+  csVector3 position;
+  double x, y, z;
+
+  if(entity->GetTripleNumValueOfKey("origin", x, y, z))
+  {
+    position.Set(x, y, z);
+  }
+  else
+  {
+    position.Set(0.0, 0.0, 0.0);
+  }
+
+  iCameraPosition *camera_position = 
+    m_engine->GetCameraPositions()->NewCameraPosition(NULL);
+
+  camera_position->Set("scene", position, 
+                       csVector3(0.0, 0.0, 1.0),
+                       csVector3(0.0, 1.0, 0.0));
+}
+
+
 void CCSWorld::Create(CMapFile *map)
 {
   CMapEntity *entity;
@@ -261,6 +284,10 @@ void CCSWorld::Create(CMapFile *map)
     else if(classname == "light")
     {
       AddLight(entity);
+    }
+    else if(classname == "info_player_start")
+    {
+      AddStart(entity);
     }
     else
     {
