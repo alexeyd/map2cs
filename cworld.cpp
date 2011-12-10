@@ -201,29 +201,70 @@ void CCSWorld::CreateMeshFromBrush(CMapBrush *brush, csString name)
 }
 
 
+
+void CCSWorld::AddLight(CMapEntity *entity)
+{
+  csVector3 position;
+  double x, y, z;
+  double radius;
+
+
+  radius = entity->GetNumValueOfKey("light");
+
+  if(entity->GetTripleNumValueOfKey("origin", x, y, z))
+  {
+    position.Set(x, y, z);
+  }
+  else
+  {
+    position.Set(0.0, 0.0, 0.0);
+  }
+
+  csRef<iLight> light = 
+    m_engine->CreateLight(NULL, position, radius, csColor(1.0, 1.0, 1.0));
+
+  light->GetMovable()->SetSector(m_sector);
+
+  m_sector->GetLights()->Add(light);
+}
+
+
 void CCSWorld::Create(CMapFile *map)
 {
   CMapEntity *entity;
   csString mesh_name;
   size_t i, entities_num;
   size_t j, brushes_num;
+  csString classname;
 
   entities_num = map->GetNumEntities();
 
   for(i = 0; i < entities_num; ++i)
   {
     entity = map->GetEntity(i);
+    classname = entity->GetClassname();
 
-    brushes_num = entity->GetNumBrushes();
-
-    for(j = 0; j < brushes_num; ++j)
+    if(classname == "worldspawn")
     {
-      mesh_name.Format("map_%s_%s_brush_%d",
-                       entity->GetClassname(),
-                       entity->GetName(),
-                       static_cast<int>(j));
-
-      CreateMeshFromBrush(entity->GetBrush(j), mesh_name);
+      brushes_num = entity->GetNumBrushes();
+     
+      for(j = 0; j < brushes_num; ++j)
+      {
+        mesh_name.Format("map_%s_%s_brush_%d",
+                         entity->GetClassname(),
+                         entity->GetName(),
+                         static_cast<int>(j));
+     
+        CreateMeshFromBrush(entity->GetBrush(j), mesh_name);
+      }
+    }
+    else if(classname == "light")
+    {
+      AddLight(entity);
+    }
+    else
+    {
+      csPrintf("Unknown classname: %s\n", classname.GetData());
     }
   }
 }
