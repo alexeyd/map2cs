@@ -45,9 +45,6 @@ class CCSWorld
 
     iObjectRegistry* m_object_reg;
     csRef<iEngine> m_engine;
-
-    csArray< csRef<iMeshWrapper> > meshes;
-    csArray< csRef<iMeshFactoryWrapper> > factories;
 };
 
 #endif // __CWORLD_H__

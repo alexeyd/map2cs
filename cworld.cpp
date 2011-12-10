@@ -104,39 +104,91 @@ void CCSWorld::CreateMeshFromBrush(CMapBrush *brush, csString name)
 
     for(j = 0; j < subbrush->m_polygons.GetSize(); ++j)
     {
-      polygon = subbrush->m_polygons.Get(j);
       CdVector3 v1, v2, v3;
+      CdVector3 t1, t2, t3;
+      CdVector3 vu, vv;
+      CdVector3 origin, first, second;
+      double first_len, second_len, l1, l2;
+      CdMatrix3 tex_mat;
+      CMapTexturedPlane *plane;
+
+      polygon = subbrush->m_polygons.Get(j);
+      plane = polygon->GetBaseplane();
+
+      origin = plane->GetTextureCoordinates(0);
+      first  = plane->GetTextureCoordinates(1);
+      second = plane->GetTextureCoordinates(2);
+
+      first_len = first.Norm();
+      second_len = second.Norm();
+      l1 = (first - origin).Norm();
+      l2 = (second - origin).Norm();
+
+      vu = (first - origin) * (first_len / l1);
+      vv = (second - origin) * (second_len / l2);
+
+      tex_mat.m11 = vu.x; tex_mat.m12 = vv.x; tex_mat.m13 = 1.0;
+      tex_mat.m21 = vu.y; tex_mat.m22 = vv.y; tex_mat.m23 = 1.0;
+      tex_mat.m31 = vu.z; tex_mat.m32 = vv.z; tex_mat.m33 = 1.0;
 
       v1 = polygon->GetVertex(0);
       v2 = polygon->GetVertex(1);
       v3 = polygon->GetVertex(2);
 
+      t1 = tex_mat * (v1 - origin);
+      t2 = tex_mat * (v2 - origin);
+      t3 = tex_mat * (v3 - origin);
+
       factstate->GetVertices()[pc*3].Set (v1.x, v1.y, v1.z);
-      factstate->GetTexels()  [pc*3].Set (0, 0);
+      factstate->GetTexels()  [pc*3].Set (t1.x, t1.y);
      
       factstate->GetVertices()[pc*3 + 1].Set (v2.x, v2.y, v2.z);
-      factstate->GetTexels()  [pc*3 + 1].Set (0, 0);
+      factstate->GetTexels()  [pc*3 + 1].Set (t2.x, t2.y);
      
       factstate->GetVertices()[pc*3 + 2].Set (v3.x, v3.y, v3.z);
-      factstate->GetTexels()  [pc*3 + 2].Set (0, 0);
+      factstate->GetTexels()  [pc*3 + 2].Set (t3.x, t3.y);
 
       ++pc;
     }
   }
 
-  for(i = 0; i < polygon_num; ++i)
+  pc = 0; // polygon count
+
+  for(i = 0; i < subbrushes.GetSize(); ++i)
   {
-    factstate->GetTriangles()[i].Set(i*3, i*3+1, i*3+2);
+    subbrush = &( subbrushes.Get(i) );
+
+    size_t range_start = pc * 3;
+    size_t range_end = (pc + subbrush->m_polygons.GetSize())* 3 - 1;
+
+    csRef<iRenderBuffer> indices_buffer = 
+      csRenderBuffer::CreateIndexRenderBuffer(subbrush->m_polygons.GetSize()*3,
+                                              CS_BUF_DYNAMIC, CS_BUFCOMP_INT,
+                                              range_start, range_end, true);
+    csArray<int> indices;
+
+    for(j = 0; j < subbrush->m_polygons.GetSize(); ++j)
+    {
+      indices.Push((pc + j) * 3);
+      indices.Push((pc + j) * 3 + 1);
+      indices.Push((pc + j) * 3 + 2);
+
+    }
+
+    pc += j;
+
+    indices_buffer->CopyInto( &(indices.Get(0)), indices.GetSize() );
+
+    factstate->AddSubMesh(indices_buffer, NULL, "");
   }
+
+  factstate->CalculateNormals();
 
   csRef<iMeshWrapper> mesh =
     m_engine->CreateMeshWrapper (fact, mesh_name.GetData());
 
   csRef<iGeneralMeshState> meshstate = 
     scfQueryInterface<iGeneralMeshState> (mesh->GetMeshObject());
-
-  factories.Push(fact);
-  meshes.Push(mesh);
 }
 
 

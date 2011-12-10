@@ -90,7 +90,7 @@ int appMain (iObjectRegistry* object_reg, int argc, char *argv[])
     PrintSyntax();
     return 1;
   }
-  
+
 
   const char* mapfile   = argv[1];
   const char* worldfile = argv[2];
@@ -131,17 +131,26 @@ int main (int argc, char *argv[])
   iObjectRegistry* object_reg = csInitializer::CreateEnvironment (argc, argv);
   if (!object_reg) return false;
   if (!csInitializer::RequestPlugins (object_reg,
-	CS_REQUEST_VFS,
-	CS_REQUEST_NULL3D,
-	CS_REQUEST_ENGINE,
-	CS_REQUEST_FONTSERVER,
-	CS_REQUEST_IMAGELOADER,
-	CS_REQUEST_LEVELLOADER,
-	CS_REQUEST_LEVELSAVER,
-	CS_REQUEST_REPORTER,
-	CS_REQUEST_REPORTERLISTENER,
+    CS_REQUEST_VFS,
+    CS_REQUEST_NULL3D,
+    CS_REQUEST_ENGINE,
+    CS_REQUEST_FONTSERVER,
+    CS_REQUEST_IMAGELOADER,
+    CS_REQUEST_LEVELLOADER,
+    CS_REQUEST_REPORTER,
+    CS_REQUEST_REPORTERLISTENER,
     CS_REQUEST_PLUGIN("crystalspace.graphics3d.shadermanager", iShaderManager),
-	CS_REQUEST_END))
+    CS_REQUEST_END))
+  {
+    return 1;
+  }
+
+  csWeakRef<iEngine> engine = csQueryRegistry<iEngine> (object_reg);
+  engine->SetSaveableFlag(true);
+
+  if (!csInitializer::RequestPlugins (object_reg,
+                                      CS_REQUEST_LEVELSAVER,
+                                      CS_REQUEST_END))
   {
     return 1;
   }
