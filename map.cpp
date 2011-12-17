@@ -20,7 +20,6 @@
 */
 
 #include "cssysdef.h"
-#include "mapstd.h"
 #include "map.h"
 #include "entity.h"
 #include "mparser.h"
@@ -35,7 +34,10 @@ CMapFile::CMapFile()
 
 CMapFile::~CMapFile()
 {
-  DELETE_VECTOR_MEMBERS(m_Entities);
+  for(size_t i = 0; i < m_Entities.GetSize(); ++i)
+  {
+    delete m_Entities[i];
+  }
 }
 
 

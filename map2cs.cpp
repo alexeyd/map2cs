@@ -18,24 +18,13 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#include "cssysdef.h"
-
 #include <stdlib.h>
 
-#include "mapstd.h"
+#include "cssysdef.h"
+#include "crystalspace.h"
+
 #include "map.h"
 #include "cworld.h"
-#include "iutil/plugin.h"
-#include "iutil/objreg.h"
-#include "iutil/document.h"
-#include "iutil/comp.h"
-#include "csutil/scf.h"
-#include "csutil/cfgfile.h"
-#include "csutil/xmltiny.h"
-#include "cstool/initapp.h"
-#include "igraphic/imageio.h"
-#include "iutil/vfs.h"
-#include "csver.h"
 
 CS_IMPLEMENT_APPLICATION
 
@@ -76,9 +65,7 @@ int appMain (iObjectRegistry* object_reg, int argc, char *argv[])
     return 1;
   }
 
-  csPrintf("\nmap2cs version " CS_VERSION "\n");
   csPrintf("Copyright (C) 1999-2003 by Thomas Hieber and others\n");
-  csPrintf("CrystalSpace version " CS_VERSION "\n");
   csPrintf("Copyright (C) 1999-2003 by Jorrit Tyberghein and others\n\n");
 
   csPrintf("map2cs comes with ABSOLUTELY NO WARRANTY; for details see the file 'COPYING'\n");

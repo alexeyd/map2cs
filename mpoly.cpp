@@ -20,7 +20,6 @@
 */
 
 #include "cssysdef.h"
-#include "mapstd.h"
 #include "brush.h"
 #include "texplane.h"
 #include "mpoly.h"

@@ -21,7 +21,6 @@
 */
 
 #include "cssysdef.h"
-#include "mapstd.h"
 #include "sparser.h"
 
 CScriptParser::CScriptParser()

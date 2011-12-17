@@ -22,7 +22,9 @@
 #ifndef __MAP_H__
 #define __MAP_H__
 
-#include "contain.h"
+#include "crystalspace.h"
+#include "entity.h"
+#include "brush.h"
 
 
 /**
@@ -91,7 +93,7 @@ protected:
 
 
 protected:
-  CMapEntityVector        m_Entities;
+  csArray<CMapEntity*>        m_Entities;
 
   /// For statistics: How many Brushes are in this map.
   size_t m_NumBrushes;

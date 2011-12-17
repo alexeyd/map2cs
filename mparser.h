@@ -22,6 +22,8 @@
 #ifndef __MPARSER_H__
 #define __MPARSER_H__
 
+#include "crystalspace.h"
+
 /**
   * Defines, how many bytes will be read ahead. This will allow you
   * to take a look on the coming characters, to decide what type

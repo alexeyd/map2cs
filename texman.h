@@ -24,10 +24,7 @@
 
 #include "crystalspace.h"
 
-
-#include "contain.h"
 #include "texfile.h"
-
 
 class CTextureManager
 {
@@ -50,7 +47,7 @@ protected:
   /**
     * Here are all textures stored, that have already been extracted.
     */
-  CTextureFileVector      m_StoredTextures;
+  csArray<CTextureFile*>      m_StoredTextures;
 };
 
 #endif // __TEXMAN_H__

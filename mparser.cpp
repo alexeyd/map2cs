@@ -20,7 +20,6 @@
 */
 
 #include "cssysdef.h"
-#include "mapstd.h"
 #include "mparser.h"
 
 CMapParser::CMapParser()

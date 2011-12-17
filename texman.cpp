@@ -20,7 +20,6 @@
 */
 
 #include "cssysdef.h"
-#include "mapstd.h"
 #include "texman.h"
 #include "map.h"
 #include "texfile.h"
@@ -42,7 +41,10 @@ CTextureManager::CTextureManager()
 
 CTextureManager::~CTextureManager()
 {
-  DELETE_VECTOR_MEMBERS(m_StoredTextures);
+  for(size_t i = 0; i < m_StoredTextures.GetSize(); ++i)
+  {
+    delete m_StoredTextures[i];
+  }
 }
 
 

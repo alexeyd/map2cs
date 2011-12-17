@@ -23,7 +23,6 @@
 #define __ENTITY_H__
 
 #include "brush.h"
-#include "contain.h"
 
 class CMapParser;
 class CMapFile;
@@ -101,7 +100,7 @@ public:
     * false. Otherwise it will return true and set the vector v to the requested
     * position.
     */
-  bool GetOrigin(CdVector3& v);
+  bool GetOrigin(csVector3& v);
 
 
   const char* GetValueOfKey(const char* key, const char* defaultvalue = 0);
@@ -118,7 +117,7 @@ protected:
   static int EntityCount;
 
   csArray<CMapBrush*>        m_Brushes;
-  CMapKeyValuePairVector m_Keymap;
+  csArray<CMapKeyValuePair*> m_Keymap;
 
   /**
     * This name is used as unique name for the entity, if no

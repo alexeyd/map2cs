@@ -20,7 +20,6 @@
 */
 
 #include "cssysdef.h"
-#include "mapstd.h"
 #include "entity.h"
 #include "mparser.h"
 #include "brush.h"
@@ -53,8 +52,15 @@ CMapEntity::CMapEntity()
 
 CMapEntity::~CMapEntity()
 {
-  DELETE_VECTOR_MEMBERS(m_Brushes);
-  DELETE_VECTOR_MEMBERS(m_Keymap);
+  for(size_t i = 0; i < m_Brushes.GetSize(); ++i)
+  {
+    delete m_Brushes[i];
+  }
+
+  for(size_t i = 0; i < m_Keymap.GetSize(); ++i)
+  {
+    delete m_Keymap[i];
+  }
 }
 
 
@@ -209,7 +215,7 @@ const char* CMapEntity::GetName()
   return m_UniqueName;
 }
 
-bool CMapEntity::GetOrigin(CdVector3& v)
+bool CMapEntity::GetOrigin(csVector3& v)
 {
   const char* origin = GetValueOfKey("origin");
   if (origin)
