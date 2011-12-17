@@ -23,8 +23,6 @@
 #define __TEXPLANE_H__
 
 #include "crystalspace.h"
-#include "texfile.h"
-
 
 class CMapTexturedPlane
 {

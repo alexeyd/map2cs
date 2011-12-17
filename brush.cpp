@@ -21,8 +21,6 @@
 
 #include "brush.h"
 
-#include <csgeom.h>
-
 #include <ctype.h>
 
 

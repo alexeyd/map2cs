@@ -23,6 +23,7 @@
 #define __MPOLY_H__
 
 #include "crystalspace.h"
+#include "texplane.h"
 
 class CMapPolygon
 {
