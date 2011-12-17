@@ -58,8 +58,7 @@ CMapEntity::~CMapEntity()
 }
 
 
-bool CMapEntity::Read(CMapParser* pParser, 
-                      CTexturedPlaneManager *tex_plane_manager)
+bool CMapEntity::Read(CMapParser* pParser)
 {
   csString buffer;
   csString key;
@@ -83,7 +82,7 @@ bool CMapEntity::Read(CMapParser* pParser,
       {
         CMapBrush* pBrush = new CMapBrush();
 
-        if (!pBrush->Read(pParser, tex_plane_manager)) 
+        if (!pBrush->Read(pParser)) 
         {
           return false;
         }

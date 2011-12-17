@@ -19,332 +19,252 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "cssysdef.h"
-#include "mapstd.h"
 #include "brush.h"
-#include "mparser.h"
-#include "map.h"
-#include "mpoly.h"
-#include "texplane.h"
+
+#include <csgeom.h>
+
 #include <ctype.h>
-
-void CMapBrushBoundingBox::Extend(CMapPolygon* pPoly)
-{
-  assert(pPoly);
-  size_t i;
-  for (i=0; i<pPoly->GetVertexCount(); i++)
-  {
-    CdVector3 v = pPoly->GetVertex(i);
-    if (!m_Defined)
-    {
-      m_Defined = true;
-
-      m_x1 = m_x2 = v.x;
-      m_y1 = m_y2 = v.y;
-      m_z1 = m_z2 = v.z;
-    }
-    else
-    {
-      //Extend the bounding box, if needed.
-      if (v.x < m_x1) m_x1 = v.x;
-      if (v.y < m_y1) m_y1 = v.y;
-      if (v.z < m_z1) m_z1 = v.z;
-
-      if (v.x > m_x2) m_x2 = v.x;
-      if (v.y > m_y2) m_y2 = v.y;
-      if (v.z > m_z2) m_z2 = v.z;
-    }
-  }
-}
-
-bool CMapBrushBoundingBox::Intersects(CMapBrushBoundingBox* pOtherBox)
-{
-  assert(pOtherBox);
-
-  if (!m_Defined || !pOtherBox->m_Defined) return false;
-
-  if (m_x1 > pOtherBox->m_x2) return false;
-  if (m_x2 < pOtherBox->m_x1) return false;
-  if (m_y1 > pOtherBox->m_y2) return false;
-  if (m_y2 < pOtherBox->m_y1) return false;
-  if (m_z1 > pOtherBox->m_z2) return false;
-  if (m_z2 < pOtherBox->m_z1) return false;
-
-  return true;
-}
 
 
 CMapBrush::CMapBrush()
 {
-  m_Line    = 0;
 }
+
 
 CMapBrush::~CMapBrush()
 {
-  size_t i;
-  for (i=0; i<m_Polygons.GetSize(); i++)
-  {
-    delete m_Polygons[i];
-  }
 }
 
-bool CMapBrush::Read(CMapParser* pParser,
-                     CTexturedPlaneManager *tex_plane_manager)
+
+bool CMapBrush::Read(CMapParser* parser)
 {
-  csString Buffer;
-  csString TextureName;
-  bool finished = false;
-  m_Line = pParser->GetCurrentLine();
+  csString buffer;
+  csString texture_name;
 
-  if (!pParser->GetSafeToken(Buffer)) return false;
-
-  while (!finished)
+  if (!parser->GetSafeToken(buffer)) 
   {
-    if (strcmp(Buffer, "}") == 0)
+    return false;
+  }
+
+  for(;;)
+  {
+    if(buffer == "}")
     {
-      //OK, we are done with this entity and it looks like
-      //everything is ok
-      finished = true;
+      break;
     }
-    else
+
+    if (buffer != "(")
     {
-      if (strcmp(Buffer, "(") != 0)
+      parser->ReportError("Format error. Expected either \"(\" or \"}\""
+                          ", Found\"%s\"", buffer.GetData());
+      return false;
+    }
+
+    //if this brush is not finished, then another plane must follow.
+    csVector3 v1, v2, v3;
+    double x_off     = 0;
+    double y_off     = 0;
+    double rot_angle = 0;
+    double x_scale = 1.0;
+    double y_scale = 1.0;
+
+    //Read the three vectors, that define the position of the plane
+    if (!ReadVector(parser, v1))    return false;
+    if (!parser->ExpectToken(")"))  return false;
+
+    if (!parser->ExpectToken("("))  return false;
+    if (!ReadVector(parser, v2))    return false;
+    if (!parser->ExpectToken(")"))  return false;
+
+    if (!parser->ExpectToken("("))  return false;
+    if (!ReadVector(parser, v3))    return false;
+    if (!parser->ExpectToken(")"))  return false;
+
+    //Get the name of the Texture
+    if (!parser->GetTextToken(buffer)) return false;
+    texture_name.Replace (buffer);
+
+    if (!parser->GetFloatToken(x_off))  return false;
+    if (!parser->GetFloatToken(y_off))  return false;
+
+    if (!parser->GetFloatToken(rot_angle)) return false;
+    if (!parser->GetFloatToken(x_scale))   return false;
+    if (!parser->GetFloatToken(y_scale))   return false;
+
+    if (!parser->GetSafeToken(buffer)) return false;
+
+    if ((buffer != "(") && (buffer != "}"))
+    {
+      // Looks like a Quake3 Arena Map. I don't know the meaning of these
+      // numbers, but there are always three of them
+      for (int i=0; i<3; i++)
       {
-        pParser->ReportError("Format error. Expected either \"(\" or \"}\""
-                             ", Found\"%s\"", Buffer.GetData());
-        return false;
-      }
-
-      //if this brush is not finished, then another plane must follow.
-      CdVector3 v1, v2, v3;
-      double x_off     = 0;
-      double y_off     = 0;
-      double rot_angle = 0;
-      double x_scale = 1.0;
-      double y_scale = 1.0;
-      CdVector3 v_tx_right(0), v_tx_up(0);
-
-      //Read the three vectors, that define the position of the plane
-      if (!ReadVector(pParser, v1))       return false;
-      if (!pParser->ExpectToken(")"))     return false;
-
-      if (!pParser->ExpectToken("("))     return false;
-      if (!ReadVector(pParser, v2))       return false;
-      if (!pParser->ExpectToken(")"))     return false;
-
-      if (!pParser->ExpectToken("("))     return false;
-      if (!ReadVector(pParser, v3))       return false;
-      if (!pParser->ExpectToken(")"))     return false;
-
-      //Get the name of the Texture
-      if (!pParser->GetTextToken(Buffer)) return false;
-      TextureName.Replace (Buffer);
-
-      //Get Texture coordinates:
-
-      // Texture coordinated in MAP files are a bit of a mess.
-      // It seems like id-software didn't do a good job, when
-      // laying the basics for this, because now, quite a few
-      // editors and manufacturors have done additions to this.
-      // map2cs will _try_ to manage the different formats
-      // automatically.
-
-      bool WC3MAP           = false;
-      bool QuarkModeTexture = false;
-      bool QuarkMirrored    = true;
-
-      // First we check for the WorldCraft 3.3 MAP format
-      // (The new official map format by valve software, and so
-      // the new format for Half-Life and all its derivates)
-      // Code for handling this format has been provided by
-      // Tim Pike <wildman@spiderweb.com.au>.
-
-      // Get Texture coordinates.
-      if (!pParser->PeekNextToken(Buffer)) return false;
-      if ((strcmp(Buffer, "[") == 0))
-      {
-        // This is for MAP's exported from Worldcraft 3.3
-        WC3MAP = true;
-
-        // Warning!!!!
-        // I have not yet seen an explanation of the new
-        // format introduced by Worldcraft 3.3, so this is
-        // mainly a hack, to get map2cs load these new maps
-        // again. Probably, the result will just be wrong
-        // with texture alignmets, that are not trivial.
-        // Thomas Hieber 2000-06-12
-
-        // Read the X Offset (3D Vector & offset)
-        if (!pParser->ExpectToken ("["))     return false;
-        if (!ReadVector(pParser, v_tx_right))   return false;
-        if (!pParser->GetFloatToken (x_off)) return false;
-        if (!pParser->ExpectToken ("]"))     return false;
-
-        // Read the Y Offset (3D Vector & offset)
-        if (!pParser->ExpectToken ("["))     return false;
-        if (!ReadVector(pParser, v_tx_up))   return false;
-        if (!pParser->GetFloatToken (y_off)) return false;
-        if (!pParser->ExpectToken ("]"))     return false;
-      }
-      else
-      {
-        // Standard Quake MAP format
-        if (!pParser->GetFloatToken(x_off))  return false;
-        if (!pParser->GetFloatToken(y_off))  return false;
-      }
-
-      // I assume, these three values have the same meaning in
-      // all MAP formats, but I could be wrong here.
-      // At least the work with old Half-Life style maps.
-
-      if (!pParser->GetFloatToken(rot_angle)) return false;
-      if (!pParser->GetFloatToken(x_scale))   return false;
-      if (!pParser->GetFloatToken(y_scale))   return false;
-
-      if (!pParser->GetSafeToken(Buffer)) return false;
-
-      // Check for additions to the map format, introduced by QuArK.
-      // (A great freeware Quake editor)
-
-      if (strcmp(Buffer, "//TX1") == 0 ||
-          strcmp(Buffer, "//TX2") == 0 )
-      {
-        QuarkModeTexture = true;
-        if (strcmp(Buffer, "//TX1") == 0)
-        {
-          QuarkMirrored = false;
-        }
-        else
-        {
-          QuarkMirrored = true;
-        }
-        if (!pParser->GetSafeToken(Buffer)) return false;
-      }
-      else
-      {
-        if (strcmp(Buffer, "(") != 0 && strcmp(Buffer, "}") != 0)
-        {
-          // Looks like a Quake3 Arena Map. I don't know the meaning of these
-          // numbers, but there are always three of them
-          for (int i=0; i<3; i++)
-          {
         bool malformed = false;
         bool intseen = false;
-        char const* q = Buffer;
+        const char *q = buffer.GetData();
+
         while (*q != '\0' && isspace(*q))
+        {
           q++;
+        }
+
         while (*q != '\0' && isdigit(*q))
         {
           q++;
           intseen = true;
         }
+
         malformed = (*q != '\0' && !isspace(*q));
 
         if (malformed || !intseen)
         {
-          pParser->ReportError(
-        "Invalid Numeric format. Expected int, found \"%s\"", 
-        Buffer.GetData());
-        return false;
-        }
-
-            if (!pParser->GetSafeToken(Buffer))
+          parser->ReportError("Invalid Numeric format. "
+                              "Expected int, found \"%s\"", 
+                              buffer.GetData());
           return false;
-          }
         }
-      }
 
-      // todo: We would need to handle WC3MAP here to, to get proper
-      //       texture alingment, but I don't know the new format...
-
-      // In some rare cases, worldcraft will write illegal planes to the
-      // map file. If we just accept these planes, we will produce follow
-      // up errors. So we will not add that plane, and issue a warning
-      // instead.
-      if (((v1-v2)%(v1-v3)).Norm() == 0.0)
-      {
-        pParser->ReportError("The three given points don't form a plane. Plane ignored.");
-      }
-      else
-      {
-        // Get a pointer to the plane. This can be either a new plane, or
-        // a pointer to a similar plane, that already existed
-        CMapTexturedPlane* pPlane = 
-          tex_plane_manager->AddPlane(v1, v2, v3, TextureName,
-                                      x_off, y_off, rot_angle,
-                                      x_scale, y_scale,
-                                      v_tx_right, v_tx_up,
-                                      QuarkModeTexture, QuarkMirrored,
-                                      WC3MAP);
-        assert(pPlane);
-
-        //Add that plane to the planes list.
-        m_Planes.Push(pPlane);
+        if (!parser->GetSafeToken(buffer))
+        {
+          return false;
+        }
       }
     }
+
+    m_planes.Push(CMapTexturedPlane(v1, v2, v3, texture_name,
+                                    x_off, y_off, rot_angle, 
+                                    x_scale, y_scale));
   }
+
   return true;
 }
 
-bool CMapBrush::ReadVector(CMapParser* pParser, CdVector3& v)
+
+bool CMapBrush::ReadVector(CMapParser* parser, csVector3& v)
 {
-  //read three integer values, that define the position of the vector.
   double value = 0;
-  if (!pParser->GetFloatToken(value)) return false;
+
+  if (!parser->GetFloatToken(value)) return false;
   v.x = value;
-  if (!pParser->GetFloatToken(value)) return false;
+
+  if (!parser->GetFloatToken(value)) return false;
   v.y = value;
-  if (!pParser->GetFloatToken(value)) return false;
+
+  if (!parser->GetFloatToken(value)) return false;
   v.z = value;
+
   return true;
 }
+
+
+void CMapBrush::CheckPlanes(const CMapTexturedPlane &plane1,
+                            const CMapTexturedPlane &plane2,
+                            const CMapTexturedPlane &plane3)
+{
+  csVector3 v;
+  bool found_plane1, found_plane2, found_plane3;
+  CMapPolygon *poly;
+
+  if(csIntersect3::ThreePlanes(plane1.GetPlane(), 
+                               plane2.GetPlane(), 
+                               plane3.GetPlane(), v))
+  {
+    found_plane1 = false;
+    found_plane2 = false; 
+    found_plane3 = false;
+
+    for(size_t i = 0; i < m_polygons.GetSize(); ++i)
+    {
+      poly = &(m_polygons[i]);
+
+      if(poly->GetPlane() == &plane1)
+      {
+        found_plane1 = true;
+        poly->AddVertex(v);
+      }
+
+      if(poly->GetPlane() == &plane2)
+      {
+        found_plane2 = true;
+        poly->AddVertex(v);
+      }
+
+      if(poly->GetPlane() == &plane3)
+      {
+        found_plane3 = true;
+        poly->AddVertex(v);
+      }
+
+      if(found_plane1 && found_plane2 && found_plane3)
+      {
+        break;
+      }
+    }
+
+    if(!found_plane1)
+    {
+      CMapPolygon new_poly(&plane1);
+      new_poly.AddVertex(v);
+      m_polygons.Push(new_poly);
+    }
+   
+    if(!found_plane2)
+    {
+      CMapPolygon new_poly(&plane2);
+      new_poly.AddVertex(v);
+      m_polygons.Push(new_poly);
+    }
+   
+    if(!found_plane3)
+    {
+      CMapPolygon new_poly(&plane3);
+      new_poly.AddVertex(v);
+      m_polygons.Push(new_poly);
+    }
+  }
+}
+
 
 void CMapBrush::CreatePolygons()
 {
-  CMapPolygon* pPoly = new CMapPolygon;
-  size_t NumPlanes = m_Planes.GetSize();
-  size_t i;
-  for (i = 0; i<NumPlanes; i++)
+  size_t planes_num, i, j, k;
+  
+  planes_num = m_planes.GetSize();
+
+  for(i = 0; i < planes_num; ++i)
   {
-    pPoly->SetErrorInfo(m_Line, i);
-    pPoly->Create(m_Planes[i], m_Planes, this);
-    if (!pPoly->IsEmpty())
+    for(j = 0; j < planes_num; ++j)
     {
-      m_Polygons.Push(pPoly);
-      m_BoundingBox.Extend(pPoly); //extend the bounding box with this poly.
-      pPoly = new CMapPolygon;
+      for(k = 0; k < planes_num; ++k)
+      {
+        if((i == j) || (i == k) || (j == k))
+        {
+          continue;
+        }
+
+        CheckPlanes(m_planes[i], m_planes[j], m_planes[k]);
+      }
     }
   }
-
-  delete pPoly;
 }
 
-bool CMapBrush::IsInside(CdVector3& v)
-{
-  size_t k, NumPlanes = m_Planes.GetSize();
-  for (k=0; k<NumPlanes; k++)
-  {
-    CMapTexturedPlane* pPlane = m_Planes[k];
 
-    if (pPlane->Classify(v) < (-SMALL_EPSILON))
+bool CMapBrush::IsInside(csVector3& v)
+{
+  for (size_t i=0; i < m_planes.GetSize(); ++i)
+  {
+    if (m_planes[i].GetPlane().Classify(v) < 0.0)
     {
       return false;
     }
-  }  //for (k)
+  }
 
   return true;
 }
 
-/// Get the resulting polygon, if the plane cuts through the brush
-void CMapBrush::IntersectWithPlane(CMapTexturedPlane* pIntersectplane,
-                                   CMapPolygon& Poly)
-{
-  Poly.SetErrorInfo(m_Line, (size_t)-1);
-  Poly.Create(pIntersectplane, m_Planes, this);
-}
 
-bool CMapBrush::IsVisible()
+const csArray<CMapPolygon>& CMapBrush::GetPolygons() const
 {
-  return true;
+  return m_polygons;
 }
 

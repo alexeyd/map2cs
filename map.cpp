@@ -58,7 +58,7 @@ bool CMapFile::Read(const char* filename)
     {
       //a new entity follows.
       CMapEntity* pEntity = new CMapEntity;
-      if (!pEntity->Read(&parser, &m_tex_plane_manager))
+      if (!pEntity->Read(&parser))
       {
         return false;
       }
@@ -90,85 +90,5 @@ void CMapFile::CreatePolygons()
   {
     m_Entities[i]->CreatePolygons();
   }
-}
-
-
-void CMapFile::GetMapSize(CdVector3& Min, CdVector3& Max)
-{
-  bool inited = false;
-  Min = CdVector3(0,0,0);
-  Max = CdVector3(0,0,0);
-
-  //iterate all entities, brushes, polygons and vertices:
-  size_t i;
-  for (i=0; i<GetNumEntities(); i++)
-  {
-    CMapEntity* pEntity = GetEntity((int)i);
-
-    // First take care of the "origin" of entities, because otherwise
-    // in very open maps, we might miss some lights.
-    CdVector3 v(0,0,0);
-    if (pEntity->GetOrigin(v))
-    {
-      if (!inited)
-      {
-        //we will intialize Min and Max to the value of the first
-        //vertex we find. (We can't just intialise Min and Max to
-        //(0,0,0), because we can'T guarantee, that nobody will
-        //create a map, that does not even enclude that point
-        //inside the maps objects.
-        inited = true;
-        Min = v;
-        Max = v;
-      }
-      else
-      {
-        //Extend Min and Max if needed.
-        if (v.x > Max.x) Max.x = v.x;
-        if (v.y > Max.y) Max.y = v.y;
-        if (v.z > Max.z) Max.z = v.z;
-
-        if (v.x < Min.x) Min.x = v.x;
-        if (v.y < Min.y) Min.y = v.y;
-        if (v.z < Min.z) Min.z = v.z;
-      }
-    }
-
-    size_t j, k, l;
-    for (j=0; j<pEntity->GetNumBrushes(); j++)
-    {
-      CMapBrush* pBrush = pEntity->GetBrush(j);
-      for (k=0; k<pBrush->GetPolygonCount(); k++)
-      {
-        CMapPolygon* pPolygon = pBrush->GetPolygon(k);
-        for (l=0; l<pPolygon->GetVertexCount(); l++)
-        {
-          CdVector3 v = pPolygon->GetVertex(l);
-          if (!inited)
-          {
-            //we will intialize Min and Max to the value of the first
-            //vertex we find. (We can't just intialise Min and Max to
-            //(0,0,0), because we can'T guarantee, that nobody will
-            //create a map, that does not even enclude that point
-            //inside the maps objects.
-            inited = true;
-            Min = v;
-            Max = v;
-          }
-          else
-          {
-            //Extend Min and Max if needed.
-            if (v.x > Max.x) Max.x = v.x;
-            if (v.y > Max.y) Max.y = v.y;
-            if (v.z > Max.z) Max.z = v.z;
-
-            if (v.x < Min.x) Min.x = v.x;
-            if (v.y < Min.y) Min.y = v.y;
-            if (v.z < Min.z) Min.z = v.z;
-          }
-        } //for vertex
-      } //for poly
-    } //for brush
-  } //for entity
 }
 

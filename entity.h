@@ -23,6 +23,7 @@
 #define __ENTITY_H__
 
 #include "brush.h"
+#include "contain.h"
 
 class CMapParser;
 class CMapFile;
@@ -71,8 +72,7 @@ public:
     * was an error, it will return false. In that case you should not
     * continue reading the file.
     */
-  bool Read(CMapParser* pParser,
-            CTexturedPlaneManager *tex_plane_manager);
+  bool Read(CMapParser* pParser);
 
   /**
     * Creates the polygons for all brushes.
@@ -117,7 +117,7 @@ public:
 protected:
   static int EntityCount;
 
-  CMapBrushVector        m_Brushes;
+  csArray<CMapBrush*>        m_Brushes;
   CMapKeyValuePairVector m_Keymap;
 
   /**

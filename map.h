@@ -23,7 +23,6 @@
 #define __MAP_H__
 
 #include "contain.h"
-#include "planeman.h"
 
 
 /**
@@ -70,15 +69,6 @@ public:
     */
   void CreatePolygons();
 
-  /**
-    * Will traverse all the map, and get the Minimum and Maximum vertex
-    * Coordinates. The map needs to be prepared by CreatePolygons()
-    * before, otherwise you will get a zero size. Also note, that this
-    * is a pretty expensive operation, so you should memorize the size
-    * somewhere and not call this method too often.
-    */
-  void GetMapSize(CdVector3& Min, CdVector3& Max);
-
 
   /// Get the number of all contained entities
   size_t         GetNumEntities()     {return m_Entities.GetSize();}
@@ -102,8 +92,6 @@ protected:
 
 protected:
   CMapEntityVector        m_Entities;
-
-  CTexturedPlaneManager    m_tex_plane_manager;
 
   /// For statistics: How many Brushes are in this map.
   size_t m_NumBrushes;
