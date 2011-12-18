@@ -28,8 +28,6 @@
 
 CS_IMPLEMENT_APPLICATION
 
-//@@@ yup, global vars are ugly.
-iImageIO* ImageLoader = 0;
 
 void PrintSyntax()
 {
@@ -44,20 +42,6 @@ void PrintSyntax()
 
 int appMain (iObjectRegistry* object_reg, int argc, char *argv[])
 {
-  csRef<iPluginManager> plugin_mgr = csQueryRegistry<iPluginManager> (object_reg);
-
-  csRef<iImageIO> il = csLoadPlugin<iImageIO>(plugin_mgr,
-                                              "crystalspace.graphic.image.io.multiplexer");
-  if (!il)
-  {
-    csPrintf ("Couldn't load image multiplexer!\n");
-    return 1;
-  }
-  else
-  {
-   ImageLoader = il;
-  }
-
   csRef<iVFS> VFS = csQueryRegistry<iVFS> (object_reg);
   if (!VFS)
   {

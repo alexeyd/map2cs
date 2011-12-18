@@ -24,7 +24,11 @@
 CCSWorld::CCSWorld(iObjectRegistry *object_reg)
 {
   m_object_reg = object_reg;
+
   m_engine = csQueryRegistry<iEngine>(m_object_reg);
+  m_vfs = csQueryRegistry<iVFS>(m_object_reg);
+  m_image_io = csQueryRegistry<iImageIO>(m_object_reg);
+
   m_sector = m_engine->CreateSector("scene");
 }
 
@@ -98,7 +102,34 @@ void CCSWorld::CreateMeshFromBrush(CMapBrush *brush, csString name)
 
   for(i = 0; i < subbrushes.GetSize(); ++i)
   {
+    csString texture_filename;
     subbrush = &( subbrushes.Get(i) );
+
+
+    texture_filename.Format("/this/%s.png", subbrush->m_texture_name.GetData());
+
+    csRef<iImage> texture_image = m_texture_map.Get(subbrush->m_texture_name,
+                                                    csRef<iImage>(NULL));
+
+    if(!texture_image.IsValid())
+    {
+      csPrintf("Will load texture %s\n",
+               texture_filename.GetData());
+      csRef<iDataBuffer> image_file = m_vfs->ReadFile(texture_filename, false);
+
+      if(image_file.IsValid())
+      {
+        texture_image = m_image_io->Load(image_file, CS_IMGFMT_TRUECOLOR);
+      }
+      else
+      {
+        csPrintf("Failed to load texture file, creating dummy texture\n");
+        texture_image.AttachNew(new csImageMemory(256,256));
+      }
+    }
+
+    m_texture_map.Put(subbrush->m_texture_name,
+                      texture_image);
 
     for(j = 0; j < subbrush->m_polygons.GetSize(); ++j)
     {

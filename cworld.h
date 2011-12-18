@@ -45,8 +45,14 @@ class CCSWorld
     void AddStart(CMapEntity *entity);
 
     iObjectRegistry* m_object_reg;
+
     csRef<iEngine> m_engine;
+    csRef<iVFS> m_vfs;
+    csRef<iImageIO> m_image_io;
+
     csRef<iSector> m_sector;
+
+    csHash< csRef<iImage>, csString > m_texture_map;
 };
 
 #endif // __CWORLD_H__
