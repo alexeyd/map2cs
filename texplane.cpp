@@ -32,9 +32,14 @@ CMapTexturedPlane::CMapTexturedPlane(const csVector3 &v0,
 {
   m_texture_name = texture_name;
 
-  m_texcoords[0].Set(0.0, 0.0, 0.0);
-  m_texcoords[1].Set(0.0, 0.0, 0.0);
-  m_texcoords[2].Set(0.0, 0.0, 0.0);
+  m_texdef.m_shift.x = static_cast<float>(x_off);
+  m_texdef.m_shift.y = static_cast<float>(y_off);
+
+  m_texdef.m_scale.x = static_cast<float>(x_scale);
+  m_texdef.m_scale.y = static_cast<float>(y_scale);
+
+  // to radians
+  m_texdef.m_rotate = static_cast<float>((M_PI * rot_angle) / 180.0);
 }
 
 
@@ -58,13 +63,8 @@ CMapTexturedPlane::operator = (const CMapTexturedPlane &other)
   }
 
   m_plane = other.m_plane;
-
-  for(int i = 0; i < 3; ++i)
-  {
-    m_texcoords[i] = other.m_texcoords[i];
-  }
-
   m_texture_name = other.m_texture_name;
+  m_texdef = other.m_texdef;
 
   return *this;
 }
@@ -76,14 +76,14 @@ const csString& CMapTexturedPlane::GetTextureName() const
 }
 
 
-const csVector3* CMapTexturedPlane::GetTextureCoords() const
-{
-  return m_texcoords;
-}
-
-
 const csPlane3& CMapTexturedPlane::GetPlane() const
 {
   return m_plane;
+}
+
+
+const CMapTexDef& CMapTexturedPlane::GetTexDef() const
+{
+  return m_texdef;
 }
 

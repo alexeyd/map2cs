@@ -24,6 +24,15 @@
 
 #include "crystalspace.h"
 
+struct CMapTexDef
+{
+  csVector2 m_shift;
+  csVector2 m_scale;
+  float m_rotate;
+};
+
+
+
 class CMapTexturedPlane
 {
   public:
@@ -44,13 +53,13 @@ class CMapTexturedPlane
 
 
     const csString& GetTextureName() const;
-    const csVector3*  GetTextureCoords() const;
     const csPlane3& GetPlane() const;
+    const CMapTexDef& GetTexDef() const;
 
   protected:
 
     csPlane3 m_plane;
-    csVector3 m_texcoords[3];
+    CMapTexDef m_texdef;
     csString m_texture_name;
 };
 
