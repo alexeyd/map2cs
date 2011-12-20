@@ -92,35 +92,19 @@ csVector2 TexCoordsFromTexDef(const CMapTexDef &texdef,
 
   float width  = static_cast<float>( texture_image->GetWidth()  );
   float height = static_cast<float>( texture_image->GetHeight() );
+  float s = sinf(texdef.m_rotate);
+  float c = cosf(texdef.m_rotate);
 
-  CS::Math::Matrix4 shift_matrix = 
-    CS::Math::Matrix4(1.0, 0.0, 0.0, texdef.m_shift.x / width,
-                      0.0, 1.0, 0.0, texdef.m_shift.y / height,
-                      0.0, 0.0, 1.0, 0.0,
-                      0.0, 0.0, 0.0, 1.0);
+  csVector3 tmp(texcoords);
 
+  texcoords.x = tmp.x * c - tmp.y * s;
+  texcoords.y = tmp.y * c + tmp.x * s;
 
-  float c = cos( texdef.m_rotate );
-  float s = sin( texdef.m_rotate );
+  texcoords.x += texdef.m_shift.x / width;
+  texcoords.y += texdef.m_shift.y / height;
 
-  CS::Math::Matrix4 rotate_matrix = 
-    CS::Math::Matrix4(c,   s,   0.0, 0.0,
-                      -s,  c,   0.0, 0.0,
-                      0.0, 0.0, 1.0, 0.0,
-                      0.0, 0.0, 0.0, 1.0);
-
-  CS::Math::Matrix4 scale_matrix = 
-    CS::Math::Matrix4(texdef.m_scale.x, 0.0,              0.0,   0.0,
-                      0.0,              texdef.m_scale.y, 0.0,   0.0,
-                      0.0,              0.0,              1.0,   0.0,
-                      0.0,              0.0,              0.0,   1.0);
-
-  CS::Math::Matrix4 inverse_transform_matrix = 
-    shift_matrix * rotate_matrix * scale_matrix;
-
-  inverse_transform_matrix.Invert();
-
-  texcoords *= inverse_transform_matrix.GetTransform();
+  texcoords.x *= texdef.m_scale.x;
+  texcoords.y *= texdef.m_scale.y;
 
   return csVector2(texcoords.x, texcoords.y);
 }
