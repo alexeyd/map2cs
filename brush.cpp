@@ -244,6 +244,11 @@ void CMapBrush::CreatePolygons()
       }
     }
   }
+
+  for(i = 0; i < m_polygons.GetSize(); ++i)
+  {
+    m_polygons[i].Finalize();
+  }
 }
 
 

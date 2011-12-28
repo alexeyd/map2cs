@@ -42,6 +42,8 @@ class CMapPolygon
 
     void AddVertex(const csVector3 &v);
 
+    void Finalize();
+
   protected:
 
     const CMapTexturedPlane *m_baseplane;

@@ -40,6 +40,8 @@ CMapTexturedPlane::CMapTexturedPlane(const csVector3 &v0,
 
   // to radians
   m_texdef.m_rotate = static_cast<float>((M_PI * rot_angle) / 180.0);
+
+  m_plane.Normalize();
 }
 
 
