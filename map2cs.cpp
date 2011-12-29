@@ -31,70 +31,79 @@ CS_IMPLEMENT_APPLICATION
 
 void PrintSyntax()
 {
-  csPrintf("map2cs is a utility program to convert a MAP file to a Crystal Space level\n\n");
-
-  csPrintf("syntax: map2cs <mapfile> <worldfile>\n");
-
-  csPrintf("for example: map2cs sample.map data/sample.zip sample.cfg\n");
-  csPrintf("             to create the CS level called sample.zip from sample.map\n");
-  csPrintf("             using config data in sample.cfg\n");
+  csPrintf("Syntax: map2cs -rc=<resource_dir> "
+           "-map=<mapfile> -world=<world_dir>\n");
 }
 
-int appMain (iObjectRegistry* object_reg, int argc, char *argv[])
+
+int AppMain (iObjectRegistry* object_reg)
 {
-  csRef<iVFS> VFS = csQueryRegistry<iVFS> (object_reg);
-  if (!VFS)
+  csRef<iVFS> vfs = csQueryRegistry<iVFS> (object_reg);
+
+  if (!vfs)
   {
     csPrintf ("Couldn't load VFS!\n");
     return 1;
   }
 
-  csPrintf("Copyright (C) 1999-2003 by Thomas Hieber and others\n");
-  csPrintf("Copyright (C) 1999-2003 by Jorrit Tyberghein and others\n\n");
+  csRef<iCommandLineParser> args_parser = 
+    csQueryRegistry<iCommandLineParser> (object_reg);
 
-  csPrintf("map2cs comes with ABSOLUTELY NO WARRANTY; for details see the file 'COPYING'\n");
-  csPrintf("This is free software, and you are welcome to redistribute it under certain\n");
-  csPrintf("conditions; see `COPYING' for details.\n\n");
+  const char *rc_dir = args_parser->GetOption("rc");
+  const char *map_file = args_parser->GetOption("map");
+  const char *world_dir = args_parser->GetOption("world");
 
-  if (argc != 3)
+  if (!rc_dir || !map_file || !world_dir)
   {
+    csPrintf("Incorrect syntax!\n");
     PrintSyntax();
     return 1;
   }
 
+  if(!vfs->Mount("/rc", rc_dir))
+  {
+    csPrintf("Failed to mount resource dir (%s)!\n", rc_dir);
+    return 1;
+  }
 
-  const char* mapfile   = argv[1];
-  const char* worldfile = argv[2];
+  if(!vfs->Mount ("/world", world_dir))
+  {
+    csPrintf("Failed to mount world dir (%s)!\n", world_dir);
+    return 1;
+  }
 
-  CMapFile Map;
-  csPrintf("Reading map '%s'...\n", mapfile);
-  if (!Map.Read(mapfile))
+
+  CMapFile map;
+  csPrintf("Reading map '%s'...\n", map_file);
+
+  if (!map.Read(map_file))
+  {
+    csPrintf("Failed to read map!\n", map_file);
     return 2;
+  }
 
-  Map.CreatePolygons();
-  csPrintf("Generating data for world '%s'...\n", worldfile);
+  csPrintf("Generating data for world '%s'...\n", world_dir);
+  map.CreatePolygons();
 
   csRef<iDocumentSystem> xml(csPtr <iDocumentSystem>
     (new csTinyDocumentSystem()));
   csRef <iDocument> doc = xml->CreateDocument();
   csRef <iDocumentNode> root = doc->CreateRoot();
 
-  CCSWorld World(object_reg);
-  World.Create(&Map);
-  World.Save(root);
+  CCSWorld world(object_reg);
+  world.Create(&map);
+  world.Save(root);
 
-
-  remove (worldfile);
-  VFS->Mount ("/map2cs_temp", worldfile);
   csPrintf ("Writing world...\n");
-  doc->Write(VFS, "/map2cs_temp/world");
 
-  VFS->Unmount ("/map2cs_temp", worldfile);
+  vfs->ChDir("/world");
+  doc->Write(vfs, "world");
 
-  csPrintf("done.\n");
+  csPrintf("Done.\n");
 
   return 0;
 }
+
 
 int main (int argc, char *argv[])
 {
@@ -126,7 +135,8 @@ int main (int argc, char *argv[])
     return 1;
   }
 
-  int ret = appMain (object_reg, argc, argv);
+
+  int ret = AppMain (object_reg);
   
   csInitializer::DestroyApplication (object_reg);
 

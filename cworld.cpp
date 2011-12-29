@@ -26,8 +26,8 @@ CCSWorld::CCSWorld(iObjectRegistry *object_reg)
   m_object_reg = object_reg;
 
   m_engine = csQueryRegistry<iEngine>(m_object_reg);
+  m_graphics_3d = csQueryRegistry<iGraphics3D>(m_object_reg);
   m_vfs = csQueryRegistry<iVFS>(m_object_reg);
-  m_image_io = csQueryRegistry<iImageIO>(m_object_reg);
 
   m_sector = m_engine->CreateSector("scene");
 }
@@ -53,11 +53,13 @@ struct CMapSubBrush
 csVector2 TexCoordsFromTexDef(const CMapTexDef &texdef,
                               const csVector3 vertex,
                               const csVector3 &plane_normal,
-                              const iImage *texture_image)
+                              int tex_width, int tex_height)
 {
   csVector3 texcoords;
 
   texcoords.z = 1.0;
+
+  csPrintf("tex width = %d, tex height = %d\n", tex_width, tex_height);
 
   if(fabs(plane_normal.z) > fabs(plane_normal.y))
   {
@@ -90,8 +92,8 @@ csVector2 TexCoordsFromTexDef(const CMapTexDef &texdef,
     }
   }
 
-  float width  = static_cast<float>( texture_image->GetWidth()  );
-  float height = static_cast<float>( texture_image->GetHeight() );
+  float width  = static_cast<float>( tex_width );
+  float height = static_cast<float>( tex_height );
   float s = sinf(texdef.m_rotate);
   float c = cosf(texdef.m_rotate);
 
@@ -119,6 +121,7 @@ void CCSWorld::CreateMeshFromBrush(CMapBrush *brush, csString name)
 
   size_t i, polygon_num;
   size_t j;
+
 
   polygon_num = brush->GetPolygons().GetSize();
 
@@ -158,37 +161,64 @@ void CCSWorld::CreateMeshFromBrush(CMapBrush *brush, csString name)
     scfQueryInterface<iGeneralFactoryState> (fact->GetMeshObjectFactory ());
 
   int vc = 0; // vertex count
+  int tex_width, tex_height;
+
 
   for(i = 0; i < subbrushes.GetSize(); ++i)
   {
-    csString texture_filename;
     subbrush = &( subbrushes.Get(i) );
 
+    csRef<iTextureWrapper> texture = 
+      m_texture_map.Get(subbrush->m_texture_name,
+                        csRef<iTextureWrapper>(NULL));
 
-    texture_filename.Format("/this/%s.png", subbrush->m_texture_name.GetData());
-
-    csRef<iImage> texture_image = m_texture_map.Get(subbrush->m_texture_name,
-                                                    csRef<iImage>(NULL));
-
-    if(!texture_image.IsValid())
+    if(!texture.IsValid())
     {
-      csPrintf("Will load texture %s\n",
-               texture_filename.GetData());
+      csString texture_filename;
+      texture_filename.Format("%s.png",
+                              subbrush->m_texture_name.GetData());
+
+      csPrintf("Will load texture %s\n", texture_filename.GetData());
+
+      m_vfs->ChDir("/rc");
       csRef<iDataBuffer> image_file = m_vfs->ReadFile(texture_filename, false);
+
 
       if(image_file.IsValid())
       {
-        texture_image = m_image_io->Load(image_file, CS_IMGFMT_TRUECOLOR);
+        m_vfs->ChDir("/world/textures");
+        m_vfs->WriteFile(texture_filename, 
+                         image_file->GetData(),
+                         image_file->GetSize());
+
+        texture = m_engine->CreateTexture(subbrush->m_texture_name, 
+                                          texture_filename, NULL, 
+                                          CS_TEXTURE_3D);
+
+        if(texture.IsValid())
+        {
+          texture->SetKeepImage(true);
+          texture->Register(m_graphics_3d->GetTextureManager());
+          m_texture_map.Put(subbrush->m_texture_name, texture);
+        }
       }
       else
       {
-        csPrintf("Failed to load texture file, creating dummy texture\n");
-        texture_image.AttachNew(new csImageMemory(256,256));
+        csPrintf("Failed to load texture file!\n");
       }
     }
 
-    m_texture_map.Put(subbrush->m_texture_name,
-                      texture_image);
+    if(texture.IsValid())
+    {
+      tex_width = texture->GetImageFile()->GetWidth();
+      tex_height = texture->GetImageFile()->GetHeight();
+    }
+    else
+    {
+      /* why not? */
+      tex_width = 256;
+      tex_height = 256;
+    }
 
     for(j = 0; j < subbrush->m_polygons.GetSize(); ++j)
     {
@@ -205,11 +235,12 @@ void CCSWorld::CreateMeshFromBrush(CMapBrush *brush, csString name)
 
       for(size_t k = 0; k < polygon->GetVertices().GetSize(); ++k)
       {
-        csVector2 texcoords = 
-          TexCoordsFromTexDef(plane->GetTexDef(),
-                              polygon->GetVertices()[k],
-                              plane->GetPlane().GetNormal(),
-                              texture_image);
+        csVector2 texcoords;
+
+        texcoords = TexCoordsFromTexDef(plane->GetTexDef(),
+                                        polygon->GetVertices()[k],
+                                        plane->GetPlane().GetNormal(),
+                                        tex_width, tex_height);
 
         factstate->AddVertex(polygon->GetVertices()[k],
                              texcoords,
@@ -256,7 +287,11 @@ void CCSWorld::CreateMeshFromBrush(CMapBrush *brush, csString name)
 
     if(!material)
     {
-      material = m_engine->CreateMaterial(material_name, NULL);
+      csRef<iTextureWrapper> texture = 
+        m_texture_map.Get(subbrush->m_texture_name,
+                          csRef<iTextureWrapper>(NULL));
+
+      material = m_engine->CreateMaterial(material_name, texture);
     }
 
     factstate->AddSubMesh(indices_buffer, material, "");
