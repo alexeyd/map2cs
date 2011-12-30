@@ -34,7 +34,7 @@
 class CCSWorld
 {
   public:
-    CCSWorld(iObjectRegistry *object_reg);
+    CCSWorld(iObjectRegistry *object_reg, bool rotate);
     ~CCSWorld();
  
     void Create(CMapFile *map);
@@ -44,6 +44,8 @@ class CCSWorld
     void CreateMeshFromBrush(CMapBrush *brush, csString name);
     void AddLight(CMapEntity *entity);
     void AddStart(CMapEntity *entity);
+
+    bool m_rotate;
 
     iObjectRegistry* m_object_reg;
 

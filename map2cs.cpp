@@ -32,7 +32,7 @@ CS_IMPLEMENT_APPLICATION
 void PrintSyntax()
 {
   csPrintf("Syntax: map2cs -rc=<resource_dir> "
-           "-map=<mapfile> -world=<world_dir>\n");
+           "-map=<mapfile> -world=<world_dir> [-[no]rotate]\n");
 }
 
 
@@ -52,6 +52,7 @@ int AppMain (iObjectRegistry* object_reg)
   const char *rc_dir = args_parser->GetOption("rc");
   const char *map_file = args_parser->GetOption("map");
   const char *world_dir = args_parser->GetOption("world");
+  bool rotate = args_parser->GetBoolOption("rotate", true);
 
   if (!rc_dir || !map_file || !world_dir)
   {
@@ -90,7 +91,7 @@ int AppMain (iObjectRegistry* object_reg)
   csRef <iDocument> doc = xml->CreateDocument();
   csRef <iDocumentNode> root = doc->CreateRoot();
 
-  CCSWorld world(object_reg);
+  CCSWorld world(object_reg, rotate);
   world.Create(&map);
   world.Save(root);
 

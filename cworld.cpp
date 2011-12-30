@@ -21,8 +21,10 @@
 
 #include "cworld.h"
 
-CCSWorld::CCSWorld(iObjectRegistry *object_reg)
+CCSWorld::CCSWorld(iObjectRegistry *object_reg, bool rotate)
 {
+  m_rotate = rotate;
+
   m_object_reg = object_reg;
 
   m_engine = csQueryRegistry<iEngine>(m_object_reg);
@@ -240,15 +242,35 @@ void CCSWorld::CreateMeshFromBrush(CMapBrush *brush, csString name)
       for(size_t k = 0; k < polygon->GetVertices().GetSize(); ++k)
       {
         csVector2 texcoords;
+        csVector3 vertex, normal;
 
         texcoords = TexCoordsFromTexDef(plane->GetTexDef(),
                                         polygon->GetVertices()[k],
                                         plane->GetPlane().GetNormal(),
                                         tex_width, tex_height);
 
-        factstate->AddVertex(polygon->GetVertices()[k],
-                             texcoords,
-                             plane->GetPlane().GetNormal(),
+        if(m_rotate)
+        {
+          vertex.x = polygon->GetVertices()[k].x;
+          vertex.y = polygon->GetVertices()[k].z;
+          vertex.z = polygon->GetVertices()[k].y;
+
+          normal.x = plane->GetPlane().GetNormal().x;
+          normal.y = plane->GetPlane().GetNormal().z;
+          normal.z = plane->GetPlane().GetNormal().y;
+        }
+        else
+        {
+          vertex.x = polygon->GetVertices()[k].x;
+          vertex.y = polygon->GetVertices()[k].y;
+          vertex.z = polygon->GetVertices()[k].z;
+
+          normal.x = plane->GetPlane().GetNormal().x;
+          normal.y = plane->GetPlane().GetNormal().y;
+          normal.z = plane->GetPlane().GetNormal().z;
+        }
+
+        factstate->AddVertex(vertex, texcoords, normal,
                              csColor4(1.0,1.0,1.0));
       }
 
