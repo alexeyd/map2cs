@@ -19,6 +19,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "cssysdef.h"
 #include "crystalspace.h"
@@ -32,12 +33,13 @@ CS_IMPLEMENT_APPLICATION
 void PrintSyntax()
 {
   csPrintf("Syntax: map2cs -rc=<resource_dir> "
-           "-map=<mapfile> -world=<world_dir> [-[no]rotate]\n");
+           "-map=<mapfile> -world=<world_dir> [-[no]rotate] [-ambient=\"<r>, <g>, <b>\"]\n");
 }
 
 
 int AppMain (iObjectRegistry* object_reg)
 {
+  csWeakRef<iEngine> engine = csQueryRegistry<iEngine> (object_reg);
   csRef<iVFS> vfs = csQueryRegistry<iVFS> (object_reg);
 
   if (!vfs)
@@ -52,6 +54,7 @@ int AppMain (iObjectRegistry* object_reg)
   const char *rc_dir = args_parser->GetOption("rc");
   const char *map_file = args_parser->GetOption("map");
   const char *world_dir = args_parser->GetOption("world");
+  const char *ambient_color = args_parser->GetOption("ambient");
   bool rotate = args_parser->GetBoolOption("rotate", true);
 
   if (!rc_dir || !map_file || !world_dir)
@@ -60,6 +63,20 @@ int AppMain (iObjectRegistry* object_reg)
     PrintSyntax();
     return 1;
   }
+
+  if(ambient_color)
+  {
+    float r, g, b;
+    if(sscanf(ambient_color, "%f, %f, %f\n", &r, &g, &b) == 3)
+    {
+      engine->SetAmbientLight(csColor(r, g, b));
+    }
+    else
+    {
+      csPrintf("Failed to parse ambient string!\n");
+    }
+  }
+
 
   if(!vfs->Mount("/rc", rc_dir))
   {

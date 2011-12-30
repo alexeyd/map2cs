@@ -278,9 +278,18 @@ void CCSWorld::CreateMeshFromBrush(CMapBrush *brush, csString name)
       {
         for(size_t k = 2; k < polygon->GetVertices().GetSize(); ++k)
         {
-          subbrush->m_indices.Push(vc);
-          subbrush->m_indices.Push(vc + k - 1);
-          subbrush->m_indices.Push(vc + k);
+          if(m_rotate)
+          {
+            subbrush->m_indices.Push(vc + k);
+            subbrush->m_indices.Push(vc + k - 1);
+            subbrush->m_indices.Push(vc);
+          }
+          else
+          {
+            subbrush->m_indices.Push(vc);
+            subbrush->m_indices.Push(vc + k - 1);
+            subbrush->m_indices.Push(vc + k);
+          }
         }
       }
 
