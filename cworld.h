@@ -29,6 +29,7 @@
 #include "entity.h"
 #include "mpoly.h"
 #include "texplane.h"
+#include "nulltex_proxy.h"
 
 class CCSWorld
 {

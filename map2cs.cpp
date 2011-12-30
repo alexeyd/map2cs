@@ -96,8 +96,12 @@ int AppMain (iObjectRegistry* object_reg)
 
   csPrintf ("Writing world...\n");
 
-  vfs->ChDir("/world");
-  doc->Write(vfs, "world");
+  /* create a stub to ensure that directory will be created */
+  vfs->ChDir("/world/textures");
+  vfs->WriteFile("stub", "abc\n", 4);
+  vfs->DeleteFile("stub");
+
+  doc->Write(vfs, "/world/world");
 
   csPrintf("Done.\n");
 

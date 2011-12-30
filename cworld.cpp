@@ -59,8 +59,6 @@ csVector2 TexCoordsFromTexDef(const CMapTexDef &texdef,
 
   texcoords.z = 1.0;
 
-  csPrintf("tex width = %d, tex height = %d\n", tex_width, tex_height);
-
   if(fabs(plane_normal.z) > fabs(plane_normal.y))
   {
     if(fabs(plane_normal.z) > fabs(plane_normal.x))
@@ -183,6 +181,11 @@ void CCSWorld::CreateMeshFromBrush(CMapBrush *brush, csString name)
       m_vfs->ChDir("/rc");
       csRef<iDataBuffer> image_file = m_vfs->ReadFile(texture_filename, false);
 
+      csString engine_texture_name;
+      engine_texture_name.Format("%s_texture", 
+                                 subbrush->m_texture_name.GetData());
+      engine_texture_name.FindReplace("/","_");
+
 
       if(image_file.IsValid())
       {
@@ -191,34 +194,35 @@ void CCSWorld::CreateMeshFromBrush(CMapBrush *brush, csString name)
                          image_file->GetData(),
                          image_file->GetSize());
 
-        texture = m_engine->CreateTexture(subbrush->m_texture_name, 
+
+        texture = m_engine->CreateTexture(engine_texture_name, 
                                           texture_filename, NULL, 
                                           CS_TEXTURE_3D);
 
-        if(texture.IsValid())
-        {
-          texture->SetKeepImage(true);
-          texture->Register(m_graphics_3d->GetTextureManager());
-          m_texture_map.Put(subbrush->m_texture_name, texture);
-        }
       }
       else
       {
         csPrintf("Failed to load texture file!\n");
+        texture = m_engine->CreateBlackTexture(engine_texture_name, 
+                                               256, 256, NULL, CS_TEXTURE_3D);
       }
+
+      texture->Register(m_graphics_3d->GetTextureManager());
+
+      csString new_texture_filename;
+      new_texture_filename.Format("textures/%s", texture_filename.GetData());
+
+      csNulltexProxy *nulltex_proxy  = 
+        new csNulltexProxy(texture->GetTextureHandle(),
+                           new_texture_filename);
+
+      texture->SetTextureHandle(nulltex_proxy);
+
+      m_texture_map.Put(subbrush->m_texture_name, texture);
     }
 
-    if(texture.IsValid())
-    {
-      tex_width = texture->GetImageFile()->GetWidth();
-      tex_height = texture->GetImageFile()->GetHeight();
-    }
-    else
-    {
-      /* why not? */
-      tex_width = 256;
-      tex_height = 256;
-    }
+    texture->GetTextureHandle()->GetOriginalDimensions(tex_width,
+                                                       tex_height);
 
     for(j = 0; j < subbrush->m_polygons.GetSize(); ++j)
     {
