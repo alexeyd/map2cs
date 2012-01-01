@@ -25,6 +25,9 @@
 #include "crystalspace.h"
 #include "texplane.h"
 
+const double MAX_WORLD_COORD = 65536.0;
+const double MIN_WORLD_COORD = -65536.0;
+
 class CMapPolygon
 {
   public:
@@ -37,17 +40,10 @@ class CMapPolygon
 
     const CMapPolygon& operator = (const CMapPolygon &other);
 
-    const csArray<csVector3>& GetVertices() const;
-    const CMapTexturedPlane* GetPlane() const;
-
-    void AddVertex(const csVector3 &v);
-
-    void Finalize();
-
-  protected:
+    void GetChopped(const csDPlane &plane);
 
     const CMapTexturedPlane *m_baseplane;
-    csArray<csVector3> m_vertices;
+    csArray<csDVector3> m_vertices;
 };
 
 #endif // __MPOLY_H__

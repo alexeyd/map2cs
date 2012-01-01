@@ -21,14 +21,13 @@
 
 #include "texplane.h"
 
-CMapTexturedPlane::CMapTexturedPlane(const csVector3 &v0, 
-                                     const csVector3 &v1,
-                                     const csVector3 &v2,
+CMapTexturedPlane::CMapTexturedPlane(const csDVector3 &v0, 
+                                     const csDVector3 &v1,
+                                     const csDVector3 &v2,
                                      const csString &texture_name,
                                      double x_off, double y_off, 
                                      double rot_angle,
                                      double x_scale, double y_scale)
-: m_plane(v0, v1, v2)
 {
   m_texture_name = texture_name;
 
@@ -40,6 +39,12 @@ CMapTexturedPlane::CMapTexturedPlane(const csVector3 &v0,
 
   // to radians
   m_texdef.m_rotate = static_cast<float>((M_PI * rot_angle) / 180.0);
+
+  csDVector3 norm;
+  double d;
+
+  csDMath3::CalcNormal(m_plane.norm, v0, v1, v2);
+  m_plane.DD = -m_plane.norm * v0;
 
   m_plane.Normalize();
 }
@@ -78,7 +83,7 @@ const csString& CMapTexturedPlane::GetTextureName() const
 }
 
 
-const csPlane3& CMapTexturedPlane::GetPlane() const
+const csDPlane& CMapTexturedPlane::GetPlane() const
 {
   return m_plane;
 }

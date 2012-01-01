@@ -37,9 +37,9 @@ class CMapTexturedPlane
 {
   public:
 
-    CMapTexturedPlane(const csVector3 &v0, 
-                      const csVector3 &v1,
-                      const csVector3 &v2,
+    CMapTexturedPlane(const csDVector3 &v0, 
+                      const csDVector3 &v1,
+                      const csDVector3 &v2,
                       const csString &texture_name,
                       double x_off, double y_off, 
                       double rot_angle,
@@ -53,12 +53,12 @@ class CMapTexturedPlane
 
 
     const csString& GetTextureName() const;
-    const csPlane3& GetPlane() const;
+    const csDPlane& GetPlane() const;
     const CMapTexDef& GetTexDef() const;
 
   protected:
 
-    csPlane3 m_plane;
+    csDPlane m_plane;
     CMapTexDef m_texdef;
     csString m_texture_name;
 };

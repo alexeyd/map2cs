@@ -35,14 +35,7 @@ class CMapBrush
     ~CMapBrush();
  
     bool Read(CMapParser* parser);
- 
- 
-    /// Create all polygons for this brush.
     void CreatePolygons();
- 
-    /// Check, if the given vector is inside this brush
-    bool IsInside(csVector3& v);
- 
  
     const csArray<CMapPolygon>& GetPolygons() const;
 
@@ -58,7 +51,7 @@ class CMapBrush
       * returns false, if there was an error. Parsing of the file should then
       * stop.
       */
-    bool ReadVector(CMapParser* parser, csVector3& v);
+    bool ReadVector(CMapParser* parser, csDVector3& v);
 
 
     csArray<CMapTexturedPlane> m_planes;

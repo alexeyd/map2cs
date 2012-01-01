@@ -21,6 +21,22 @@
 
 #include "mpoly.h"
 
+static inline int DominantAxis(const csDVector3 &v)
+{
+  if ( (fabs(v.x) > fabs(v.y)) && 
+       (fabs(v.x) > fabs(v.z)) )
+  {
+    return CS_AXIS_X;
+  }
+  else if (fabs(v.y) > fabs(v.z))
+  {
+    return CS_AXIS_Y;
+  }
+
+  return CS_AXIS_Z;
+}
+
+
 CMapPolygon::CMapPolygon()
 {
   m_baseplane = NULL;
@@ -30,6 +46,56 @@ CMapPolygon::CMapPolygon()
 CMapPolygon::CMapPolygon(const CMapTexturedPlane *baseplane)
 {
   m_baseplane = baseplane;
+
+  const csDPlane *plane = &(baseplane->GetPlane());
+
+  csDVector3 up, right;
+  csDVector3 vert, origin;
+
+  switch( DominantAxis(plane->Normal()) )
+  {
+    case CS_AXIS_X:
+    case CS_AXIS_Y:
+      up.x = 0.0;
+      up.y = 0.0;
+      up.z = 1.0;
+      break;
+
+    case CS_AXIS_Z:
+      up.x = 1.0;
+      up.y = 0.0;
+      up.z = 0.0;
+      break;
+
+    default:
+      CS_ASSERT(0);
+      break;
+  }
+
+  double bend_norm = up * plane->Normal();
+  csDVector3 bend_vec = plane->Normal() * bend_norm;
+  up -= bend_vec;
+  up.Normalize();
+
+  right.Cross(up, plane->Normal());
+  right.Normalize();
+
+  up *= MAX_WORLD_COORD * 2.0;
+  right *= MAX_WORLD_COORD * 2.0;
+
+  origin = -plane->Normal() * plane->D();
+
+  vert = origin - right + up;
+  m_vertices.Push(vert);
+
+  vert = origin + right + up;
+  m_vertices.Push(vert);
+
+  vert = origin + right - up;
+  m_vertices.Push(vert);
+
+  vert = origin - right - up;
+  m_vertices.Push(vert);
 }
 
 
@@ -57,138 +123,63 @@ CMapPolygon::~CMapPolygon()
 {
 }
 
-
-const csArray<csVector3>& CMapPolygon::GetVertices() const
+/* Shinigami chop!!! */
+void CMapPolygon::GetChopped(const csDPlane &plane)
 {
-  return m_vertices;
-}
+  csArray<csDVector3> new_vertices;
+  double c, next_c;
 
+  csDVector3 p1, p2, p;
+  double p1_dist, p2_dist, split_k;
 
-const CMapTexturedPlane* CMapPolygon::GetPlane() const
-{
-  return m_baseplane;
-}
-
-
-void CMapPolygon::AddVertex(const csVector3 &v)
-{
-  for(size_t i = 0; i < m_vertices.GetSize(); ++i)
-  {
-    if(csVector3::Norm(m_vertices[i] - v) < SMALL_EPSILON)
-    {
-      return;
-    }
-  }
-
-  m_vertices.Push(v);
-}
-
-
-/* Check if p2 is right of (p0,p1) segment */
-static inline float
-IsRight(const csArray<csVector2> &verts, int i0, int i1, int i2)
-{
-  csVector2 e1 = verts[i2] - verts[i0];
-  csVector2 e2 = verts[i1] - verts[i0];
-  return e1.x * e2.y - e2.x * e1.y;
-}
- 
-
-static void 
-CorrectOrder(const csArray<csVector2> &verts, csArray<int> &inds)
-{
-  csArray<int> inds_deq;
-  int top, bot;
-
-  inds.DeleteAll();
-  inds_deq.SetSize(2*verts.GetSize()+1);
-
-  bot = verts.GetSize()-2;
-  top = bot+3;
-
-  inds_deq[bot] = inds_deq[top] = 2;
-
-  if (IsRight(verts, 0, 1, 2) > 0) 
-  {
-    inds_deq[bot+1] = 0;
-    inds_deq[bot+2] = 1;
-  }
-  else 
-  {
-    inds_deq[bot+1] = 1;
-    inds_deq[bot+2] = 0;
-  }
-
-  for (int i=3; i < verts.GetSize(); i++) 
-  {
-    while (IsRight(verts, inds_deq[bot], inds_deq[bot+1], i) <= 0)
-    {
-      ++bot;
-    }
-
-    inds_deq[--bot] = i;
-
-    while (IsRight(verts, inds_deq[top-1], inds_deq[top], i) <= 0)
-    {
-      --top;
-    }
-
-    inds_deq[++top] = i;
-  }
-
-  for (int i = 0; i <= top - bot; ++i)
-  {
-    inds.Push(inds_deq[bot + i]);
-  }
-}
-
-
-// Project everything on a base plane and
-// find the correct vertex order
-void CMapPolygon::Finalize()
-{
-  csPlane3 plane(m_baseplane->GetPlane());
-  csVector3 ox, oy, oz;
-  csVector3 origin;
-
-  if(m_vertices.GetSize() < 3)
-  {
-    m_vertices.DeleteAll();
-    return;
-  }
-
-  origin = -plane.D() * plane.GetNormal();
-
-  oz = plane.GetNormal();
-  ox = csVector3::Unit(m_vertices[0] - origin);
-  oy.Cross(oz, ox);
-  oy.Normalize();
-
-  CS::Math::Matrix4 base(ox.x, oy.x, oz.x, origin.x,
-                         ox.y, oy.y, oz.y, origin.y,
-                         ox.z, oy.z, oz.z, origin.z,
-                         0.0 , 0.0 , 0.0 , 1.0);
-  base.Invert();
-
-
-  csArray<csVector2> v;
-  csArray<int> inds;
 
   for(size_t i = 0; i < m_vertices.GetSize(); ++i)
   {
-    csVector3 transformed(m_vertices[i] * base.GetTransform());
-    v.Push(csVector2(transformed.x, transformed.y));
+    c = plane.Classify(m_vertices[i]);
+
+    if(fabs(c) < SMALL_EPSILON)
+    {
+      new_vertices.Push(m_vertices[i]);
+      continue;
+    }
+
+    /* Normals point inwards here! */
+
+    if(c > 0.0)
+    {
+      new_vertices.Push(m_vertices[i]);
+    }
+
+    next_c = plane.Classify(m_vertices[ (i + 1) % m_vertices.GetSize() ]);
+
+    if((fabs(next_c) < SMALL_EPSILON) || 
+        (c > 0.0 && next_c > 0.0)     || 
+        (c < 0.0 && next_c < 0.0))
+    {
+      continue;
+    }
+
+    /* generate a split point */
+    if(c > 0.0)
+    {
+      p1 = m_vertices[i];
+      p2 = m_vertices[(i + 1) % m_vertices.GetSize()];
+    }
+    else
+    {
+      p1 = m_vertices[(i + 1) % m_vertices.GetSize()];
+      p2 = m_vertices[i];
+    }
+
+    p1_dist = plane.Distance(p1);
+    p2_dist = plane.Distance(p2);
+    split_k = p1_dist / (p2_dist + p1_dist);
+
+    p = p1 + (p2 - p1) * split_k;
+
+    new_vertices.Push(p);
   }
 
-  CorrectOrder(v, inds);
-
-  csArray<csVector3> ordered_verts;
-
-  for(size_t i = 0; i < inds.GetSize(); ++i)
-  {
-    ordered_verts.Push(m_vertices[inds[i]]);
-  }
-
-  m_vertices = ordered_verts;
+  m_vertices = new_vertices;
 }
 

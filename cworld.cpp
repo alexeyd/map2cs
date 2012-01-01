@@ -128,7 +128,7 @@ void CCSWorld::CreateMeshFromBrush(CMapBrush *brush, csString name)
   for(i = 0; i < polygon_num; ++i)
   {
     const CMapPolygon &polygon = brush->GetPolygons()[i];
-    texture_name = polygon.GetPlane()->GetTextureName();
+    texture_name = polygon.m_baseplane->GetTextureName();
 
     subbrush = NULL;
 
@@ -237,46 +237,46 @@ void CCSWorld::CreateMeshFromBrush(CMapBrush *brush, csString name)
       const CMapTexturedPlane *plane;
 
       const CMapPolygon *polygon = subbrush->m_polygons.Get(j);
-      plane = polygon->GetPlane();
+      plane = polygon->m_baseplane;
 
-      for(size_t k = 0; k < polygon->GetVertices().GetSize(); ++k)
+      for(size_t k = 0; k < polygon->m_vertices.GetSize(); ++k)
       {
         csVector2 texcoords;
         csVector3 vertex, normal;
 
         texcoords = TexCoordsFromTexDef(plane->GetTexDef(),
-                                        polygon->GetVertices()[k],
-                                        plane->GetPlane().GetNormal(),
+                                        polygon->m_vertices[k],
+                                        plane->GetPlane().Normal(),
                                         tex_width, tex_height);
 
         if(m_rotate)
         {
-          vertex.x = polygon->GetVertices()[k].x;
-          vertex.y = polygon->GetVertices()[k].z;
-          vertex.z = polygon->GetVertices()[k].y;
-
-          normal.x = plane->GetPlane().GetNormal().x;
-          normal.y = plane->GetPlane().GetNormal().z;
-          normal.z = plane->GetPlane().GetNormal().y;
+          vertex.x = static_cast<float>(polygon->m_vertices[k].x);
+          vertex.y = static_cast<float>(polygon->m_vertices[k].z);
+          vertex.z = static_cast<float>(polygon->m_vertices[k].y);
+                                        
+          normal.x = static_cast<float>(plane->GetPlane().Normal().x);
+          normal.y = static_cast<float>(plane->GetPlane().Normal().z);
+          normal.z = static_cast<float>(plane->GetPlane().Normal().y);
         }
         else
         {
-          vertex.x = polygon->GetVertices()[k].x;
-          vertex.y = polygon->GetVertices()[k].y;
-          vertex.z = polygon->GetVertices()[k].z;
+          vertex.x = static_cast<float>(polygon->m_vertices[k].x);
+          vertex.y = static_cast<float>(polygon->m_vertices[k].y);
+          vertex.z = static_cast<float>(polygon->m_vertices[k].z);
 
-          normal.x = plane->GetPlane().GetNormal().x;
-          normal.y = plane->GetPlane().GetNormal().y;
-          normal.z = plane->GetPlane().GetNormal().z;
+          normal.x = static_cast<float>(plane->GetPlane().Normal().x);
+          normal.y = static_cast<float>(plane->GetPlane().Normal().y);
+          normal.z = static_cast<float>(plane->GetPlane().Normal().z);
         }
 
         factstate->AddVertex(vertex, texcoords, normal,
                              csColor4(1.0,1.0,1.0));
       }
 
-      if(polygon->GetVertices().GetSize() >= 3)
+      if(polygon->m_vertices.GetSize() >= 3)
       {
-        for(size_t k = 2; k < polygon->GetVertices().GetSize(); ++k)
+        for(size_t k = 2; k < polygon->m_vertices.GetSize(); ++k)
         {
           if(m_rotate)
           {
@@ -293,7 +293,7 @@ void CCSWorld::CreateMeshFromBrush(CMapBrush *brush, csString name)
         }
       }
 
-      vc += static_cast<int>(polygon->GetVertices().GetSize());
+      vc += static_cast<int>(polygon->m_vertices.GetSize());
     }
   }
 

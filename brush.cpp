@@ -59,7 +59,7 @@ bool CMapBrush::Read(CMapParser* parser)
     }
 
     //if this brush is not finished, then another plane must follow.
-    csVector3 v1, v2, v3;
+    csDVector3 v1, v2, v3;
     double x_off     = 0;
     double y_off     = 0;
     double rot_angle = 0;
@@ -138,7 +138,7 @@ bool CMapBrush::Read(CMapParser* parser)
 }
 
 
-bool CMapBrush::ReadVector(CMapParser* parser, csVector3& v)
+bool CMapBrush::ReadVector(CMapParser* parser, csDVector3& v)
 {
   double value = 0;
 
@@ -155,114 +155,22 @@ bool CMapBrush::ReadVector(CMapParser* parser, csVector3& v)
 }
 
 
-void CMapBrush::CheckPlanes(const CMapTexturedPlane &plane1,
-                            const CMapTexturedPlane &plane2,
-                            const CMapTexturedPlane &plane3)
-{
-  csVector3 v;
-  bool found_plane1, found_plane2, found_plane3;
-  CMapPolygon *poly;
-
-  if(csIntersect3::ThreePlanes(plane1.GetPlane(), 
-                               plane2.GetPlane(), 
-                               plane3.GetPlane(), v))
-  {
-    found_plane1 = false;
-    found_plane2 = false; 
-    found_plane3 = false;
-
-    for(size_t i = 0; i < m_polygons.GetSize(); ++i)
-    {
-      poly = &(m_polygons[i]);
-
-      if(poly->GetPlane() == &plane1)
-      {
-        found_plane1 = true;
-        poly->AddVertex(v);
-      }
-
-      if(poly->GetPlane() == &plane2)
-      {
-        found_plane2 = true;
-        poly->AddVertex(v);
-      }
-
-      if(poly->GetPlane() == &plane3)
-      {
-        found_plane3 = true;
-        poly->AddVertex(v);
-      }
-
-      if(found_plane1 && found_plane2 && found_plane3)
-      {
-        break;
-      }
-    }
-
-    if(!found_plane1)
-    {
-      CMapPolygon new_poly(&plane1);
-      new_poly.AddVertex(v);
-      m_polygons.Push(new_poly);
-    }
-   
-    if(!found_plane2)
-    {
-      CMapPolygon new_poly(&plane2);
-      new_poly.AddVertex(v);
-      m_polygons.Push(new_poly);
-    }
-   
-    if(!found_plane3)
-    {
-      CMapPolygon new_poly(&plane3);
-      new_poly.AddVertex(v);
-      m_polygons.Push(new_poly);
-    }
-  }
-}
-
-
 void CMapBrush::CreatePolygons()
 {
-  size_t planes_num, i, j, k;
+  size_t i, j;
   
-  planes_num = m_planes.GetSize();
-
-  for(i = 0; i < planes_num; ++i)
+  for(i = 0; i < m_planes.GetSize(); ++i)
   {
-    for(j = 0; j < planes_num; ++j)
-    {
-      for(k = 0; k < planes_num; ++k)
-      {
-        if((i == j) || (i == k) || (j == k))
-        {
-          continue;
-        }
-
-        CheckPlanes(m_planes[i], m_planes[j], m_planes[k]);
-      }
-    }
+    m_polygons.Push( CMapPolygon(&(m_planes[i])) );
   }
 
   for(i = 0; i < m_polygons.GetSize(); ++i)
   {
-    m_polygons[i].Finalize();
-  }
-}
-
-
-bool CMapBrush::IsInside(csVector3& v)
-{
-  for (size_t i=0; i < m_planes.GetSize(); ++i)
-  {
-    if (m_planes[i].GetPlane().Classify(v) < 0.0)
+    for(j = 0; j < m_planes.GetSize(); ++j)
     {
-      return false;
+      m_polygons[i].GetChopped( m_planes[j].GetPlane() );
     }
   }
-
-  return true;
 }
 
 
