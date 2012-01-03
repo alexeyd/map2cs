@@ -353,7 +353,14 @@ void CCSWorld::AddLight(CMapEntity *entity)
 
   if(entity->GetTripleNumValueOfKey("origin", x, y, z))
   {
-    position.Set(x, y, z);
+    if(m_rotate)
+    {
+      position.Set(x, z, y);
+    }
+    else
+    {
+      position.Set(x, y, z);
+    }
   }
   else
   {
@@ -376,7 +383,14 @@ void CCSWorld::AddStart(CMapEntity *entity)
 
   if(entity->GetTripleNumValueOfKey("origin", x, y, z))
   {
-    position.Set(x, y, z);
+    if(m_rotate)
+    {
+      position.Set(x, z, y);
+    }
+    else
+    {
+      position.Set(x, y, z);
+    }
   }
   else
   {
