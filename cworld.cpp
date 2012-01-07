@@ -43,7 +43,7 @@ struct CMapSubBrush
 {
   csString m_texture_name;
   csArray<const CMapPolygon*> m_polygons;
-  csArray<int> m_indices;
+  csArray<unsigned> m_indices;
 
   CMapSubBrush() {}
 
@@ -161,7 +161,9 @@ void CCSWorld::CreateMeshFromBrush(CMapBrush *brush, csString name)
   csRef<iGeneralFactoryState> factstate = 
     scfQueryInterface<iGeneralFactoryState> (fact->GetMeshObjectFactory ());
 
-  int vc = 0; // vertex count
+  factstate->DisableAutoNormals();
+
+  unsigned vc = 0; // vertex count
   int tex_width, tex_height;
 
 
@@ -272,6 +274,8 @@ void CCSWorld::CreateMeshFromBrush(CMapBrush *brush, csString name)
         }
 
         vertex *= m_scale;
+        normal *= -1.0;
+        normal.Normalize();
 
         factstate->AddVertex(vertex, texcoords, normal,
                              csColor4(1.0,1.0,1.0));
@@ -311,7 +315,8 @@ void CCSWorld::CreateMeshFromBrush(CMapBrush *brush, csString name)
 
     csRef<iRenderBuffer> indices_buffer = 
       csRenderBuffer::CreateIndexRenderBuffer(subbrush->m_indices.GetSize(),
-                                              CS_BUF_DYNAMIC, CS_BUFCOMP_INT,
+                                              CS_BUF_DYNAMIC, 
+                                              CS_BUFCOMP_UNSIGNED_INT,
                                               range_start, range_end);
 
     indices_buffer->CopyInto( &(subbrush->m_indices.Get(0)), 
@@ -334,8 +339,6 @@ void CCSWorld::CreateMeshFromBrush(CMapBrush *brush, csString name)
 
     factstate->AddSubMesh(indices_buffer, material, "");
   }
-
-  factstate->CalculateNormals();
 
   csRef<iMeshWrapper> mesh =
     m_engine->CreateMeshWrapper (fact, mesh_name.GetData());
