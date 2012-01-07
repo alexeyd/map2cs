@@ -21,9 +21,10 @@
 
 #include "cworld.h"
 
-CCSWorld::CCSWorld(iObjectRegistry *object_reg, bool rotate)
+CCSWorld::CCSWorld(iObjectRegistry *object_reg, bool rotate, float scale)
 {
   m_rotate = rotate;
+  m_scale = scale;
 
   m_object_reg = object_reg;
 
@@ -270,6 +271,8 @@ void CCSWorld::CreateMeshFromBrush(CMapBrush *brush, csString name)
           normal.z = static_cast<float>(plane->GetPlane().Normal().z);
         }
 
+        vertex *= m_scale;
+
         factstate->AddVertex(vertex, texcoords, normal,
                              csColor4(1.0,1.0,1.0));
       }
@@ -367,6 +370,8 @@ void CCSWorld::AddLight(CMapEntity *entity)
     position.Set(0.0, 0.0, 0.0);
   }
 
+  position *= m_scale;
+
   csRef<iLight> light = 
     m_engine->CreateLight(NULL, position, radius, csColor(1.0, 1.0, 1.0));
 
@@ -396,6 +401,8 @@ void CCSWorld::AddStart(CMapEntity *entity)
   {
     position.Set(0.0, 0.0, 0.0);
   }
+
+  position *= m_scale;
 
   iCameraPosition *camera_position = 
     m_engine->GetCameraPositions()->NewCameraPosition(NULL);

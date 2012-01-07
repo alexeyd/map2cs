@@ -33,7 +33,9 @@ CS_IMPLEMENT_APPLICATION
 void PrintSyntax()
 {
   csPrintf("Syntax: map2cs -rc=<resource_dir> "
-           "-map=<mapfile> -world=<world_dir> [-[no]rotate] [-ambient=\"<r>, <g>, <b>\"]\n");
+           "-map=<mapfile> -world=<world_dir> "
+           "[-[no]rotate] [-ambient=\"<r>, <g>, <b>\"] "
+           "[-scale=<s>]\n");
 }
 
 
@@ -55,7 +57,10 @@ int AppMain (iObjectRegistry* object_reg)
   const char *map_file = args_parser->GetOption("map");
   const char *world_dir = args_parser->GetOption("world");
   const char *ambient_color = args_parser->GetOption("ambient");
+  const char *scale_text = args_parser->GetOption("scale");
   bool rotate = args_parser->GetBoolOption("rotate", true);
+
+  float scale = 1.0;
 
   if (!rc_dir || !map_file || !world_dir)
   {
@@ -74,6 +79,20 @@ int AppMain (iObjectRegistry* object_reg)
     else
     {
       csPrintf("Failed to parse ambient string!\n");
+    }
+  }
+
+  if(scale_text)
+  {
+    float t;
+
+    if(sscanf(scale_text, "%f", &t) == 1)
+    {
+      scale = static_cast<float>(t);
+    }
+    else
+    {
+      csPrintf("Incorrect scale value (%s)!\n", scale_text);
     }
   }
 
@@ -108,7 +127,7 @@ int AppMain (iObjectRegistry* object_reg)
   csRef <iDocument> doc = xml->CreateDocument();
   csRef <iDocumentNode> root = doc->CreateRoot();
 
-  CCSWorld world(object_reg, rotate);
+  CCSWorld world(object_reg, rotate, scale);
   world.Create(&map);
   world.Save(root);
 

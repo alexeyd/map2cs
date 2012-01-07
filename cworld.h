@@ -34,7 +34,7 @@
 class CCSWorld
 {
   public:
-    CCSWorld(iObjectRegistry *object_reg, bool rotate);
+    CCSWorld(iObjectRegistry *object_reg, bool rotate, float scale);
     ~CCSWorld();
  
     void Create(CMapFile *map);
@@ -46,6 +46,7 @@ class CCSWorld
     void AddStart(CMapEntity *entity);
 
     bool m_rotate;
+    float m_scale;
 
     iObjectRegistry* m_object_reg;
 
