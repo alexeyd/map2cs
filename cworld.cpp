@@ -59,6 +59,22 @@ csVector2 TexCoordsFromTexDef(const CMapTexDef &texdef,
                               int tex_width, int tex_height)
 {
   csVector3 texcoords;
+  csVector2 inverse_scale;
+
+  float width  = static_cast<float>( tex_width );
+  float height = static_cast<float>( tex_height );
+
+  float s = sinf(-texdef.m_rotate);
+  float c = cosf(-texdef.m_rotate);
+
+  inverse_scale.x = 1.0 / (texdef.m_scale.x * width);
+  inverse_scale.y = 1.0 / (texdef.m_scale.x * -height);
+
+  CS::Math::Matrix4 local2tex = 
+    CS::Math::Matrix4(c*inverse_scale.x, -s*inverse_scale.x, 0.0, texdef.m_shift.x / width,
+                      s*inverse_scale.y, c*inverse_scale.y,  0.0, texdef.m_shift.y / height,
+                      0.0, 0.0, 1.0, 0.0,
+                      0.0, 0.0, 0.0, 1.0);
 
   texcoords.z = 1.0;
 
@@ -93,21 +109,7 @@ csVector2 TexCoordsFromTexDef(const CMapTexDef &texdef,
     }
   }
 
-  float width  = static_cast<float>( tex_width );
-  float height = static_cast<float>( tex_height );
-  float s = sinf(texdef.m_rotate);
-  float c = cosf(texdef.m_rotate);
-
-  csVector3 tmp(texcoords);
-
-  texcoords.x = tmp.x * c - tmp.y * s;
-  texcoords.y = tmp.y * c + tmp.x * s;
-
-  texcoords.x += texdef.m_shift.x / width;
-  texcoords.y += texdef.m_shift.y / height;
-
-  texcoords.x *= texdef.m_scale.x;
-  texcoords.y *= texdef.m_scale.y;
+  texcoords *= local2tex.GetTransform();
 
   return csVector2(texcoords.x, texcoords.y);
 }
