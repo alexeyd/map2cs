@@ -22,13 +22,29 @@
 #ifndef __TEXPLANE_H__
 #define __TEXPLANE_H__
 
-#include "crystalspace.h"
+#include <crystalspace.h>
 
-struct CMapTexDef
+class mcTexDef
 {
-  csVector2 m_shift;
-  csVector2 m_scale;
-  float m_rotate;
+  protected:
+    csVector2 m_shift;
+    csVector2 m_scale;
+    float m_rotate;
+
+    csVector3 m_plane_normal;
+    int m_max_axis;
+
+  public:
+    const mcTexDef& operator= (const mcTexDef &other);
+
+    mcTexDef();
+    mcTexDef(const mcTexDef &other);
+
+    mcTexDef(const csVector2 &shift, const csVector2 &scale, 
+             float rotate, const csVector3 &plane_normal);
+
+    csVector2 TexCoords(const csVector3 vertex,
+                        int tex_width, int tex_height) const;
 };
 
 
@@ -54,12 +70,12 @@ class CMapTexturedPlane
 
     const csString& GetTextureName() const;
     const csDPlane& GetPlane() const;
-    const CMapTexDef& GetTexDef() const;
+    const mcTexDef& GetTexDef() const;
 
   protected:
 
     csDPlane m_plane;
-    CMapTexDef m_texdef;
+    mcTexDef m_texdef;
     csString m_texture_name;
 };
 

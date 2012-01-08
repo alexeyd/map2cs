@@ -53,67 +53,6 @@ struct CMapSubBrush
   }
 };
 
-csVector2 TexCoordsFromTexDef(const CMapTexDef &texdef,
-                              const csVector3 vertex,
-                              const csVector3 &plane_normal,
-                              int tex_width, int tex_height)
-{
-  csVector3 texcoords;
-  csVector2 inverse_scale;
-
-  float width  = static_cast<float>( tex_width );
-  float height = static_cast<float>( tex_height );
-
-  float s = sinf(-texdef.m_rotate);
-  float c = cosf(-texdef.m_rotate);
-
-  inverse_scale.x = 1.0 / (texdef.m_scale.x * width);
-  inverse_scale.y = 1.0 / (texdef.m_scale.x * -height);
-
-  CS::Math::Matrix4 local2tex = 
-    CS::Math::Matrix4(c*inverse_scale.x, -s*inverse_scale.x, 0.0, texdef.m_shift.x / width,
-                      s*inverse_scale.y, c*inverse_scale.y,  0.0, texdef.m_shift.y / height,
-                      0.0, 0.0, 1.0, 0.0,
-                      0.0, 0.0, 0.0, 1.0);
-
-  texcoords.z = 1.0;
-
-  if(fabs(plane_normal.z) > fabs(plane_normal.y))
-  {
-    if(fabs(plane_normal.z) > fabs(plane_normal.x))
-    {
-      // plane xy
-      texcoords.x = vertex.x;
-      texcoords.y = vertex.y;
-    }
-    else
-    {
-      // plane yz
-      texcoords.x = vertex.y;
-      texcoords.y = vertex.z;
-    }
-  }
-  else
-  {
-    if(fabs(plane_normal.y) > fabs(plane_normal.x))
-    {
-      // plane xz
-      texcoords.x = vertex.x;
-      texcoords.y = vertex.z;
-    }
-    else
-    {
-      // plane yz
-      texcoords.x = vertex.y;
-      texcoords.y = vertex.z;
-    }
-  }
-
-  texcoords *= local2tex.GetTransform();
-
-  return csVector2(texcoords.x, texcoords.y);
-}
-
 
 void CCSWorld::CreateMeshFromBrush(CMapBrush *brush, csString name)
 {
@@ -249,35 +188,26 @@ void CCSWorld::CreateMeshFromBrush(CMapBrush *brush, csString name)
         csVector2 texcoords;
         csVector3 vertex, normal;
 
-        texcoords = TexCoordsFromTexDef(plane->GetTexDef(),
-                                        polygon->m_vertices[k],
-                                        plane->GetPlane().Normal(),
-                                        tex_width, tex_height);
+        texcoords = plane->GetTexDef().TexCoords(polygon->m_vertices[k],
+                                                 tex_width, tex_height);
+        vertex = polygon->m_vertices[k];
+        normal = plane->GetPlane().Normal();
 
         if(m_rotate)
         {
-          vertex.x = static_cast<float>(polygon->m_vertices[k].x);
-          vertex.y = static_cast<float>(polygon->m_vertices[k].z);
-          vertex.z = static_cast<float>(polygon->m_vertices[k].y);
-                                        
-          normal.x = static_cast<float>(plane->GetPlane().Normal().x);
-          normal.y = static_cast<float>(plane->GetPlane().Normal().z);
-          normal.z = static_cast<float>(plane->GetPlane().Normal().y);
-        }
-        else
-        {
-          vertex.x = static_cast<float>(polygon->m_vertices[k].x);
-          vertex.y = static_cast<float>(polygon->m_vertices[k].y);
-          vertex.z = static_cast<float>(polygon->m_vertices[k].z);
+          float swap;
 
-          normal.x = static_cast<float>(plane->GetPlane().Normal().x);
-          normal.y = static_cast<float>(plane->GetPlane().Normal().y);
-          normal.z = static_cast<float>(plane->GetPlane().Normal().z);
+          swap = vertex.y;
+          vertex.y = vertex.z;
+          vertex.z = swap;
+
+          swap = normal.y;
+          normal.y = normal.z;
+          normal.z = swap;
         }
 
         vertex *= m_scale;
         normal *= -1.0;
-        normal.Normalize();
 
         factstate->AddVertex(vertex, texcoords, normal,
                              csColor4(1.0,1.0,1.0));
