@@ -86,7 +86,7 @@ bool CMapEntity::Read(CMapParser* pParser)
 
       if (buffer == "(")
       {
-        CMapBrush* pBrush = new CMapBrush();
+        mcBrush* pBrush = new mcBrush();
 
         if (!pBrush->Read(pParser)) 
         {
@@ -233,12 +233,12 @@ bool CMapEntity::GetOrigin(csVector3& v)
   return false;
 }
 
-void CMapEntity::CreatePolygons()
+void CMapEntity::CreatePolygons(double max_edge_length)
 {
   size_t i;
   for (i=0; i<m_Brushes.GetSize(); i++)
   {
-    m_Brushes[i]->CreatePolygons();
+    m_Brushes[i]->CreatePolygons(max_edge_length);
   }
 }
 

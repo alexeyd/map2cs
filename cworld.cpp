@@ -42,7 +42,7 @@ CCSWorld::~CCSWorld()
 struct CMapSubBrush
 {
   csString m_texture_name;
-  csArray<const CMapPolygon*> m_polygons;
+  csArray<const mcPolygon*> m_polygons;
   csArray<unsigned> m_indices;
 
   CMapSubBrush() {}
@@ -54,7 +54,7 @@ struct CMapSubBrush
 };
 
 
-void CCSWorld::CreateMeshFromBrush(CMapBrush *brush, csString name)
+void CCSWorld::CreateMeshFromBrush(mcBrush *brush, csString name)
 {
   csArray<CMapSubBrush> subbrushes;
 
@@ -69,8 +69,8 @@ void CCSWorld::CreateMeshFromBrush(CMapBrush *brush, csString name)
 
   for(i = 0; i < polygon_num; ++i)
   {
-    const CMapPolygon &polygon = brush->GetPolygons()[i];
-    texture_name = polygon.m_baseplane->GetTextureName();
+    const mcPolygon &polygon = brush->GetPolygons()[i];
+    texture_name = polygon.GetBaseplane()->GetTextureName();
 
     subbrush = NULL;
 
@@ -180,17 +180,19 @@ void CCSWorld::CreateMeshFromBrush(CMapBrush *brush, csString name)
       csMatrix3 tex_mat;
       const CMapTexturedPlane *plane;
 
-      const CMapPolygon *polygon = subbrush->m_polygons.Get(j);
-      plane = polygon->m_baseplane;
+      const mcPolygon *polygon = subbrush->m_polygons.Get(j);
+      plane = polygon->GetBaseplane();
 
-      for(size_t k = 0; k < polygon->m_vertices.GetSize(); ++k)
+      const csArray<csDVector3> &verts = polygon->GetVertices();
+
+      for(size_t k = 0; k < verts.GetSize(); ++k)
       {
         csVector2 texcoords;
         csVector3 vertex, normal;
 
-        texcoords = plane->GetTexDef().TexCoords(polygon->m_vertices[k],
+        texcoords = plane->GetTexDef().TexCoords(verts[k],
                                                  tex_width, tex_height);
-        vertex = polygon->m_vertices[k];
+        vertex = verts[k];
         normal = plane->GetPlane().Normal();
 
         if(m_rotate)
@@ -213,26 +215,25 @@ void CCSWorld::CreateMeshFromBrush(CMapBrush *brush, csString name)
                              csColor4(1.0,1.0,1.0));
       }
 
-      if(polygon->m_vertices.GetSize() >= 3)
+      const csArray<csTriangle> &tris = polygon->GetTriangles();
+
+      for(size_t k = 0; k < tris.GetSize(); ++k)
       {
-        for(size_t k = 2; k < polygon->m_vertices.GetSize(); ++k)
+        if(m_rotate)
         {
-          if(m_rotate)
-          {
-            subbrush->m_indices.Push(vc + k);
-            subbrush->m_indices.Push(vc + k - 1);
-            subbrush->m_indices.Push(vc);
-          }
-          else
-          {
-            subbrush->m_indices.Push(vc);
-            subbrush->m_indices.Push(vc + k - 1);
-            subbrush->m_indices.Push(vc + k);
-          }
+          subbrush->m_indices.Push(tris[k][2] + vc);
+          subbrush->m_indices.Push(tris[k][1] + vc);
+          subbrush->m_indices.Push(tris[k][0] + vc);
+        }
+        else
+        {
+          subbrush->m_indices.Push(tris[k][0] + vc);
+          subbrush->m_indices.Push(tris[k][1] + vc);
+          subbrush->m_indices.Push(tris[k][2] + vc);
         }
       }
 
-      vc += static_cast<int>(polygon->m_vertices.GetSize());
+      vc += static_cast<int>(verts.GetSize());
     }
   }
 
@@ -241,9 +242,20 @@ void CCSWorld::CreateMeshFromBrush(CMapBrush *brush, csString name)
   {
     subbrush = &( subbrushes.Get(i) );
 
-    size_t range_start = static_cast<size_t>(subbrush->m_indices[0]);
-    size_t range_end = 
-    static_cast<size_t>(subbrush->m_indices[subbrush->m_indices.GetSize()-1]);
+    int range_start = -1, range_end = -1;
+
+    for(size_t j = 0; j < subbrush->m_indices.GetSize(); ++j)
+    {
+      if(range_end < 0 || subbrush->m_indices.Get(j) > range_end)
+      {
+        range_end = subbrush->m_indices.Get(j);
+      }
+
+      if(range_start < 0 || subbrush->m_indices.Get(j) < range_start)
+      {
+        range_start = subbrush->m_indices.Get(j);
+      }
+    }
 
     csRef<iRenderBuffer> indices_buffer = 
       csRenderBuffer::CreateIndexRenderBuffer(subbrush->m_indices.GetSize(),

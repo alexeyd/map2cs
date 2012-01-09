@@ -28,16 +28,16 @@
 #include "mpoly.h"
 
 
-class CMapBrush
+class mcBrush
 {
   public:
-    CMapBrush();
-    ~CMapBrush();
+    mcBrush();
+    ~mcBrush();
  
     bool Read(CMapParser* parser);
-    void CreatePolygons();
+    void CreatePolygons(double max_edge_length);
  
-    const csArray<CMapPolygon>& GetPolygons() const;
+    const csArray<mcPolygon>& GetPolygons() const;
 
   protected:
 
@@ -55,7 +55,7 @@ class CMapBrush
 
 
     csArray<CMapTexturedPlane> m_planes;
-    csArray<CMapPolygon> m_polygons;
+    csArray<mcPolygon> m_polygons;
 };
 
 #endif // __BRUSH_H__

@@ -41,7 +41,7 @@ class CCSWorld
     void Save(csRef <iDocumentNode> &root);
 
   private:
-    void CreateMeshFromBrush(CMapBrush *brush, csString name);
+    void CreateMeshFromBrush(mcBrush *brush, csString name);
     void AddLight(CMapEntity *entity);
     void AddStart(CMapEntity *entity);
 

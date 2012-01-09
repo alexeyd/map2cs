@@ -84,13 +84,13 @@ bool CMapFile::Read(const char* filename)
 }
 
 
-void CMapFile::CreatePolygons()
+void CMapFile::CreatePolygons(double max_edge_length)
 {
   size_t i;
 
   for (i=0; i<m_Entities.GetSize(); i++)
   {
-    m_Entities[i]->CreatePolygons();
+    m_Entities[i]->CreatePolygons(max_edge_length);
   }
 }
 

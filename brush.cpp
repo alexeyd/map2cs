@@ -24,17 +24,17 @@
 #include <ctype.h>
 
 
-CMapBrush::CMapBrush()
+mcBrush::mcBrush()
 {
 }
 
 
-CMapBrush::~CMapBrush()
+mcBrush::~mcBrush()
 {
 }
 
 
-bool CMapBrush::Read(CMapParser* parser)
+bool mcBrush::Read(CMapParser* parser)
 {
   csString buffer;
   csString texture_name;
@@ -138,7 +138,7 @@ bool CMapBrush::Read(CMapParser* parser)
 }
 
 
-bool CMapBrush::ReadVector(CMapParser* parser, csDVector3& v)
+bool mcBrush::ReadVector(CMapParser* parser, csDVector3& v)
 {
   double value = 0;
 
@@ -155,13 +155,13 @@ bool CMapBrush::ReadVector(CMapParser* parser, csDVector3& v)
 }
 
 
-void CMapBrush::CreatePolygons()
+void mcBrush::CreatePolygons(double max_edge_length)
 {
   size_t i, j;
   
   for(i = 0; i < m_planes.GetSize(); ++i)
   {
-    m_polygons.Push( CMapPolygon(&(m_planes[i])) );
+    m_polygons.Push( mcPolygon(&(m_planes[i])) );
   }
 
   for(i = 0; i < m_polygons.GetSize(); ++i)
@@ -171,10 +171,15 @@ void CMapBrush::CreatePolygons()
       m_polygons[i].GetChopped( m_planes[j].GetPlane() );
     }
   }
+
+  for(i = 0; i < m_polygons.GetSize(); ++i)
+  {
+    m_polygons[i].Triangulate(max_edge_length);
+  }
 }
 
 
-const csArray<CMapPolygon>& CMapBrush::GetPolygons() const
+const csArray<mcPolygon>& mcBrush::GetPolygons() const
 {
   return m_polygons;
 }

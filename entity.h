@@ -76,11 +76,11 @@ public:
   /**
     * Creates the polygons for all brushes.
     */
-  void CreatePolygons();
+  void CreatePolygons(double max_edge_length);
 
   /// Access all brushes from outside
   size_t     GetNumBrushes()     {return m_Brushes.GetSize();}
-  CMapBrush* GetBrush(size_t index) {return m_Brushes.Get(index);}
+  mcBrush* GetBrush(size_t index) {return m_Brushes.Get(index);}
 
 
   /**
@@ -116,7 +116,7 @@ public:
 protected:
   static int EntityCount;
 
-  csArray<CMapBrush*>        m_Brushes;
+  csArray<mcBrush*>        m_Brushes;
   csArray<CMapKeyValuePair*> m_Keymap;
 
   /**

@@ -69,7 +69,7 @@ public:
   /**
     * Make all entities create their polygons.
     */
-  void CreatePolygons();
+  void CreatePolygons(double max_edge_length);
 
 
   /// Get the number of all contained entities

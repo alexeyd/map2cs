@@ -34,8 +34,8 @@ void PrintSyntax()
 {
   csPrintf("Syntax: map2cs -rc=<resource_dir> "
            "-map=<mapfile> -world=<world_dir> "
-           "[-[no]rotate] [-ambient=\"<r>, <g>, <b>\"] "
-           "[-scale=<s>]\n");
+           "[-[no]rotate] [-ambient=\"<float_r>, <float_g>, <float_b>\"] "
+           "[-scale=<float>] [-max_edge_len=<float>]\n\n");
 }
 
 
@@ -58,9 +58,11 @@ int AppMain (iObjectRegistry* object_reg)
   const char *world_dir = args_parser->GetOption("world");
   const char *ambient_color = args_parser->GetOption("ambient");
   const char *scale_text = args_parser->GetOption("scale");
+  const char *max_edge_len_text = args_parser->GetOption("max_edge_len");
   bool rotate = args_parser->GetBoolOption("rotate", true);
 
   float scale = 1.0;
+  double max_edge_len = 8.0;
 
   if (!rc_dir || !map_file || !world_dir)
   {
@@ -88,13 +90,29 @@ int AppMain (iObjectRegistry* object_reg)
 
     if(sscanf(scale_text, "%f", &t) == 1)
     {
-      scale = static_cast<float>(t);
+      scale = t;
     }
     else
     {
       csPrintf("Incorrect scale value (%s)!\n", scale_text);
     }
   }
+
+  if(max_edge_len_text)
+  {
+    float t;
+
+    if(sscanf(max_edge_len_text, "%f", &t) == 1)
+    {
+      max_edge_len = t;
+    }
+    else
+    {
+      csPrintf("Incorrect max_edge_len value (%s)!\n", max_edge_len_text);
+    }
+  }
+
+  max_edge_len /= scale;
 
 
   if(!vfs->Mount("/rc", rc_dir))
@@ -120,7 +138,7 @@ int AppMain (iObjectRegistry* object_reg)
   }
 
   csPrintf("Generating data for world '%s'...\n", world_dir);
-  map.CreatePolygons();
+  map.CreatePolygons(max_edge_len);
 
   csRef<iDocumentSystem> xml(csPtr <iDocumentSystem>
     (new csTinyDocumentSystem()));
