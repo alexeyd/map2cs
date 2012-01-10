@@ -188,7 +188,7 @@ int main (int argc, char *argv[])
   engine->SetSaveableFlag(true);
 
   if (!csInitializer::RequestPlugins (object_reg,
-                                      CS_REQUEST_LEVELSAVER,
+                   CS_REQUEST_PLUGIN("crystalspace.level.saver2", iSaver),
                                       CS_REQUEST_END))
   {
     return 1;
