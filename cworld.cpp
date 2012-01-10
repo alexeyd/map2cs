@@ -298,8 +298,16 @@ void CCSWorld::AddLight(CMapEntity *entity)
   double x, y, z;
   double radius;
 
+  bool is_directional = false;
+  csVector3 target;
+
 
   radius = entity->GetNumValueOfKey("light");
+
+  if(fabs(radius) < SMALL_EPSILON)
+  {
+    radius = MAX_WORLD_COORD;
+  }
 
   if(entity->GetTripleNumValueOfKey("origin", x, y, z))
   {
@@ -317,14 +325,51 @@ void CCSWorld::AddLight(CMapEntity *entity)
     position.Set(0.0, 0.0, 0.0);
   }
 
+  if(entity->GetBoolValueOfKey("_sun", false))
+  {
+    if(entity->GetTripleNumValueOfKey("target", x, y, z))
+    {
+      if(m_rotate)
+      {
+        target.Set(x, z, y);
+      }
+      else
+      {
+        target.Set(x, y, z);
+      }
+    }
+    else
+    {
+      target.Set(0.0, 0.0, 0.0);
+    }
+
+    is_directional = true;
+  }
+
   position *= m_scale;
+  target *= m_scale;
+  radius *= m_scale;
 
   csRef<iLight> light = 
     m_engine->CreateLight(NULL, position, radius, csColor(1.0, 1.0, 1.0));
 
-  light->GetMovable()->SetSector(m_sector);
+  if(is_directional)
+  {
+    light->SetType(CS_LIGHT_DIRECTIONAL);
 
+    target -= position;
+    target.Normalize();
+
+
+    light->GetMovable()->GetTransform().LookAtZUpY(target, 
+                                                   csVector3(0.0, 1.0, 0.0));
+    light->GetMovable()->UpdateMove();
+  }
+
+  light->GetMovable()->SetSector(m_sector);
   m_sector->GetLights()->Add(light);
+
+  light->GetMovable()->UpdateMove();
 }
 
 
