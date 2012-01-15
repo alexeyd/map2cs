@@ -34,12 +34,12 @@ mcBrush::~mcBrush()
 }
 
 
-bool mcBrush::Read(CMapParser* parser)
+bool mcBrush::Read(mcMapParser* parser)
 {
   csString buffer;
   csString texture_name;
 
-  if (!parser->GetSafeToken(buffer)) 
+  if (!parser->GetTextToken(buffer)) 
   {
     return false;
   }
@@ -66,17 +66,46 @@ bool mcBrush::Read(CMapParser* parser)
     double x_scale = 1.0;
     double y_scale = 1.0;
 
-    //Read the three vectors, that define the position of the plane
-    if (!ReadVector(parser, v1))    return false;
-    if (!parser->ExpectToken(")"))  return false;
+    /* Read the three vectors, that define the position of the plane */
+    if (!ReadVector(parser, v1))
+    {
+      return false;
+    }
 
-    if (!parser->ExpectToken("("))  return false;
-    if (!ReadVector(parser, v2))    return false;
-    if (!parser->ExpectToken(")"))  return false;
+    if(!parser->GetTextToken(buffer) || buffer != ")")
+    {
+      return false;
+    }
 
-    if (!parser->ExpectToken("("))  return false;
-    if (!ReadVector(parser, v3))    return false;
-    if (!parser->ExpectToken(")"))  return false;
+    if (!parser->GetTextToken(buffer) || buffer != "(")
+    {
+      return false;
+    }
+
+    if (!ReadVector(parser, v2))
+    {
+      return false;
+    }
+
+    if(!parser->GetTextToken(buffer) || buffer != ")")
+    {
+      return false;
+    }
+
+    if (!parser->GetTextToken(buffer) || buffer != "(")
+    {
+      return false;
+    }
+
+    if (!ReadVector(parser, v3))
+    {
+      return false;
+    }
+
+    if(!parser->GetTextToken(buffer) || buffer != ")")
+    {
+      return false;
+    }
 
     //Get the name of the Texture
     if (!parser->GetTextToken(buffer)) return false;
@@ -89,7 +118,7 @@ bool mcBrush::Read(CMapParser* parser)
     if (!parser->GetFloatToken(x_scale))   return false;
     if (!parser->GetFloatToken(y_scale))   return false;
 
-    if (!parser->GetSafeToken(buffer)) return false;
+    if (!parser->GetTextToken(buffer)) return false;
 
     if ((buffer != "(") && (buffer != "}"))
     {
@@ -122,7 +151,7 @@ bool mcBrush::Read(CMapParser* parser)
           return false;
         }
 
-        if (!parser->GetSafeToken(buffer))
+        if (!parser->GetTextToken(buffer))
         {
           return false;
         }
@@ -138,7 +167,7 @@ bool mcBrush::Read(CMapParser* parser)
 }
 
 
-bool mcBrush::ReadVector(CMapParser* parser, csDVector3& v)
+bool mcBrush::ReadVector(mcMapParser* parser, csDVector3& v)
 {
   double value = 0;
 

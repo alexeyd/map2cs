@@ -34,7 +34,7 @@ class mcBrush
     mcBrush();
     ~mcBrush();
  
-    bool Read(CMapParser* parser);
+    bool Read(mcMapParser* parser);
     void CreatePolygons(double max_edge_length);
  
     const csArray<mcPolygon>& GetPolygons() const;
@@ -51,7 +51,7 @@ class mcBrush
       * returns false, if there was an error. Parsing of the file should then
       * stop.
       */
-    bool ReadVector(CMapParser* parser, csDVector3& v);
+    bool ReadVector(mcMapParser* parser, csDVector3& v);
 
 
     csArray<CMapTexturedPlane> m_planes;

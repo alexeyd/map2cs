@@ -23,9 +23,8 @@
 #define __ENTITY_H__
 
 #include "brush.h"
+#include "mparser.h"
 
-class CMapParser;
-class CMapFile;
 
 class CMapKeyValuePair
 {
@@ -71,7 +70,7 @@ public:
     * was an error, it will return false. In that case you should not
     * continue reading the file.
     */
-  bool Read(CMapParser* pParser);
+  bool Read(mcMapParser* pParser);
 
   /**
     * Creates the polygons for all brushes.

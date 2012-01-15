@@ -26,9 +26,10 @@
 #include "texplane.h"
 #include "mpoly.h"
 
-CMapFile::CMapFile()
+CMapFile::CMapFile(iObjectRegistry *object_reg)
 {
   m_NumBrushes  = 0;
+  m_object_reg = object_reg;
 }
 
 
@@ -43,7 +44,7 @@ CMapFile::~CMapFile()
 
 bool CMapFile::Read(const char* filename)
 {
-  CMapParser parser;
+  mcMapParser parser(m_object_reg);
   csString buffer;
 
   m_NumBrushes  = 0;
@@ -54,7 +55,7 @@ bool CMapFile::Read(const char* filename)
   }
 
 
-  while (parser.GetNextToken(buffer))
+  while (parser.GetTextToken(buffer))
   {
     if (strcmp(buffer, "{") == 0)
     {

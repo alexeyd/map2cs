@@ -46,7 +46,7 @@ public:
   /**
     * Constructs the map
     */
-  CMapFile();
+  CMapFile(iObjectRegistry *object_reg);
 
   /**
     * Destructor, will do cleanup. It will take care of removing all
@@ -97,6 +97,8 @@ protected:
 
   /// For statistics: How many Brushes are in this map.
   size_t m_NumBrushes;
+
+  iObjectRegistry *m_object_reg;
 };
 
 #endif // __MAP_H__

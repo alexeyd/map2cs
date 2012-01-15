@@ -19,330 +19,318 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "cssysdef.h"
 #include "mparser.h"
 
-CMapParser::CMapParser()
+mcMapParser::mcMapParser(iObjectRegistry *object_reg)
 {
-  m_fd = 0;
-  m_Eof = false;
-  m_CurrentLine = 0;
-  memset(m_NextChars, 0, sizeof(m_NextChars));
+  m_empty_token = false;
+
+  m_current_line = 0;
+
+  m_peek_char = '\0';
+  m_char_peeked = false;
+
+  m_object_reg = object_reg;
 }
 
-CMapParser::~CMapParser()
+
+mcMapParser::~mcMapParser()
 {
-  if (m_fd)
-  {
-    fclose(m_fd);
-  }
 }
 
-bool CMapParser::Open(const char* filename)
+
+bool mcMapParser::Open(const char* filename)
 {
-  m_fd  = fopen(filename, "rb");
-  if (!m_fd)
+  csRef<iVFS> vfs = csQueryRegistry<iVFS>(m_object_reg);
+
+  m_file = vfs->Open(filename, VFS_FILE_READ);
+
+  if (!m_file.IsValid())
   {
     ReportError("Error opening map \"%s\"", filename);
     return false;
   }
 
-  m_CurrentLine = 1;
-  m_Eof = false;
-  int i;
-  for (i=0;i<ReadAhead;i++)
-  {
-    GetNextChar(); //Ensure m_NextChars is inited;
-  }
+  m_current_line = 1;
 
-  if (!ReadNextToken (m_NextToken))
+  if ( !ReadNextToken(m_next_token) )
   {
-    m_NextToken.Clear();
+    m_next_token.Clear();
   }
 
   return true;
 }
 
-bool CMapParser::GetNextChar()
+
+bool mcMapParser::GetChar(char &c)
 {
-  int val = EOF;
-  if (!m_Eof)
+  if(m_char_peeked)
   {
-    val = getc(m_fd);
-    if (val == EOF)
-    {
-      m_Eof = true;
-    }
-  }
-
-  memmove(m_NextChars, &m_NextChars[1], ReadAhead-1);
-  if (m_NextChars[0] == '\n')
-  {
-    m_CurrentLine++;
-  }
-
-  if (m_Eof)
-  {
-    m_NextChars[ReadAhead-1] = 0;
-    return m_NextChars[0] != 0;
-  }
-  else
-  {
-    m_NextChars[ReadAhead-1] = val;
+    c = m_peek_char;
+    m_char_peeked = false;
     return true;
   }
-}
 
-bool CMapParser::SkipWhitespace ()
-{
-  char ch;
-  while ((ch = m_NextChars[0]) <= ' ')
+  if(m_file->Read(&c, 1) != 1)
   {
-    if (!GetNextChar())
-    {
-      return false;
-    }
-  }
-  return true;
-}
-
-bool CMapParser::SkipToNextLine()
-{
-  while (m_NextChars[0] != '\n')
-  {
-    if (!GetNextChar())
-    {
-      return false;
-    }
-  }
-  return true;
-}
-
-bool CMapParser::GetNextToken (csString& str)
-{
-  str.Replace (m_NextToken);
-  if (m_NextToken.IsEmpty() && !emptinessHack) return false;
-  ReadNextToken (m_NextToken);
-  return true;
-}
-
-bool CMapParser::PeekNextToken (csString& str)
-{
-  str.Replace (m_NextToken);
-  if (m_NextToken.IsEmpty() && !emptinessHack) return false;
-  return true;
-}
-
-bool CMapParser::ReadNextToken (csString& str)
-{
-  //char *strStart = str;
-
-  //*str = 0; 
-  str.Clear(); //clear the string first
-  emptinessHack = false;
-
-  if (!SkipWhitespace ()) return false;
-
-  //Check for Comments, that start by "//" and end at the end of the line
-  if (m_NextChars[0] == '/' && m_NextChars[1] == '/')
-  {
-    if ( m_NextChars[2] == 'T' &&
-         m_NextChars[3] == 'X' &&
-        (m_NextChars[4] == '1' || m_NextChars[4] == '2'))
-    {
-      char Num = m_NextChars[4];
-
-      //This is a special texture alignment info, provided by QuArK,
-      //that is a little more powerfull than the standard map format
-      //can provide.
-      //For more info on QuArK visit: http://www.planetquake.com/quark
-      //
-      //For compatibility reasons, these extensions are hidden in a
-      //comment. Normally we will remove all comments in the parser,
-      //but this comment is important!
-      if (!GetNextChar())    return false;
-      if (!GetNextChar())    return false;
-      if (!SkipToNextLine()) return false;
-      if (!SkipWhitespace()) return false;
-      str.Replace ("//TX1");
-      str.SetAt (4, Num);
-      return true;
-    }
-
-    if (!GetNextChar())    return false;
-    if (!GetNextChar())    return false;
-    if (!SkipToNextLine()) return false;
-    if (!SkipWhitespace()) return false;
-
-    //Call recursively, to eliminate multiple commented lines.
-    return ReadNextToken (str);
-  }
-
-  //Quoted strings are returned directly
-  if (m_NextChars[0] == '\"')
-  {
-    do
-    {
-      //drop the '\"' character
-      if (!GetNextChar())
-      {
-        //*str = 0;     //Terminate the string anyway
-        return false; //if we fail now, the token is not complete!
-      }
-
-      if (m_NextChars[0] == '\"')
-      {
-        //The end of the string has been reached
-
-        GetNextChar(); //remove the end of string token (We dont care for success here!)
-	emptinessHack = str.IsEmpty();
-        //*str = 0;
-        return true;
-      }
-      //*str++ = m_NextChars[0];
-      str << m_NextChars[0];
-    } while(1); //while (str<(strStart+maxlen));
-  }
-
-  // Check for special single character tokens
-  if (m_NextChars[0]=='{' ||
-      m_NextChars[0]=='}' ||
-      m_NextChars[0]=='(' ||
-      m_NextChars[0]==')' ||
-      m_NextChars[0]=='\'' ||
-      m_NextChars[0]==':')
-  {
-    //These special single character tokens must be followed by a whitespace
-    //to be accepted. (otherwise there are problems with special texture names)
-    if (m_NextChars[1] < ' ')
-    {
-      //*str++ = m_NextChars[0];
-      //*str   = 0;
-      str << m_NextChars[0];
-      GetNextChar(); //Remove this token (We don't care for success here!)
-      return true;
-    }
-  }
-
-  //parse a regular word
-  do
-  {
-    //*str++ = m_NextChars[0];
-    str << m_NextChars[0];
-    if (!GetNextChar())
-    {
-      //if there are no more characters, we claim the token
-      //ended here in a regular way.
-      //*str = 0;
-      return true;
-    }
-
-    if (m_NextChars[0]=='{' ||
-        m_NextChars[0]=='}' ||
-        m_NextChars[0]=='(' ||
-        m_NextChars[0]==')' ||
-        m_NextChars[0]=='\'' ||
-        m_NextChars[0]==':' ||
-        m_NextChars[0]<=' ')
-    {
-      break;
-    }
-  } while (1); //(str<(strStart+maxlen));
-
-  /*if (str>=(strStart+maxlen)) 
-  {
-    char tokenBegin[16];
-
-    strncpy(tokenBegin, strStart, sizeof(tokenBegin)-1);
-    tokenBegin[sizeof(tokenBegin)] = '\0';
-
-    ReportError("Token (\"%s\"...) too long, max. length %d", tokenBegin, maxlen);
     return false;
   }
 
-  *str = 0;*/
   return true;
 }
 
-bool CMapParser::GetIntToken  (int& val)
+bool mcMapParser::PeekChar(char &c)
 {
-  csString Buffer;
-  if (!GetNextToken(Buffer))
+  if(!m_char_peeked)
+  {
+    if(m_file->Read(&m_peek_char, 1) != 1)
+    {
+      return false;
+    }
+  }
+
+  m_char_peeked = true;
+  c = m_peek_char;
+  return true;
+}
+
+
+bool mcMapParser::SkipWhitespace()
+{
+  char c;
+
+  for(;;)
+  {
+    if( !PeekChar(c) )
+    {
+      return false;
+    }
+
+    if(c != ' ' && c != '\t' && c != '\r')
+    {
+      break;
+    }
+
+    if( !GetChar(c) )
+    {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+
+bool mcMapParser::SkipToNextLine()
+{
+  char c;
+
+  for(;;)
+  {
+    if( !GetChar(c) )
+    {
+      return false;
+    }
+
+    if( c == '\n' )
+    {
+      break;
+    }
+  }
+
+  return true;
+}
+
+
+bool mcMapParser::GetNextToken (csString& str)
+{
+  str.Replace (m_next_token);
+
+  if (m_next_token.IsEmpty() && !m_empty_token)
+  {
+    return false;
+  }
+
+  ReadNextToken (m_next_token);
+  return true;
+}
+
+
+bool mcMapParser::ReadNextToken (csString& str)
+{
+  char c, next_c;
+
+  str.Clear();
+  m_empty_token = false;
+
+  /* Skip commented and empty lines */
+  for(;;)
+  {
+    if( !SkipWhitespace() ) 
+    {
+      return false;
+    }
+
+    if( !GetChar(c) )
+    {
+      return false;
+    }
+
+    if(c == '\n')
+    {
+      /* An empty line */
+      ++m_current_line;
+      continue;
+    }
+
+    if( PeekChar(next_c) )
+    {
+      if( c == '/' && next_c == '/')
+      {
+        if( !SkipToNextLine() )
+        {
+          return false;
+        }
+      }
+      else
+      {
+        break;
+      }
+    }
+    else
+    {
+      break;
+    }
+  }
+
+  /* Quoted strings are returned directly */
+  if (c == '\"')
+  {
+    for(;;)
+    {
+      if ( !GetChar(c) )
+      {
+        /* If we fail now, the token is not complete! */
+        return false; 
+      }
+
+      if (c == '\"')
+      {
+        /* The end of the string has been reached */
+	m_empty_token = str.IsEmpty();
+        return true;
+      }
+
+      str << c;
+    }
+  }
+
+  /* Check for special single character tokens */
+  if ( c == '{'  || c == '}' ||
+       c == '('  || c == ')' ||
+       c == '\'' || c ==':'  )
+  {
+    str << c;
+    return true;
+  }
+
+  /* Parse a regular word */
+  for(;;)
+  {
+    str << c;
+
+    if (!PeekChar(next_c))
+    {
+      break;
+    }
+
+    if ( next_c == '{'  || next_c == '}'  ||
+         next_c == '('  || next_c == ')'  ||
+         next_c == '\'' || next_c ==':'   ||
+         next_c == ' '  || next_c == '\t' || 
+         next_c == '\r' || next_c == '\n' )
+    {
+      break;
+    }
+
+    if(!GetChar(c))
+    {
+      break;
+    }
+  }
+
+  return true;
+}
+
+
+bool mcMapParser::GetIntToken  (int &val)
+{
+  csString buffer;
+
+  if (!GetNextToken(buffer))
   {
     ReportError("Unexpected end of file. (expected an int number)");
     return false;
   }
+
   char dummy;
-  if (sscanf(Buffer, "%d%c", &val, &dummy)!=1)
+  if (sscanf(buffer, "%d%c", &val, &dummy) != 1)
   {
-    ReportError("Invalid Numeric format. Expected int, found \"%s\"", 
-      Buffer.GetData());
+    ReportError("Invalid Numeric format. Expected int, found \"%s\"",
+                buffer.GetData());
     return false;
   }
+
   return true;
 }
 
-bool CMapParser::GetFloatToken(double& val)
+
+bool mcMapParser::GetFloatToken(double &val)
 {
-  csString Buffer;
-  if (!GetNextToken(Buffer))
+  csString buffer;
+  if (!GetNextToken(buffer))
   {
     ReportError("Unexpected end of file. (expected a double number)");
     return false;
   }
+
   char dummy;
-  if (sscanf(Buffer, "%lf%c", &val, &dummy)!=1)
+  if (sscanf(buffer, "%lf%c", &val, &dummy) != 1)
   {
     ReportError("Invalid Numeric format. Expected double, found \"%s\"", 
-      Buffer.GetData());
+                buffer.GetData());
     return false;
   }
+
   return true;
 }
 
-bool CMapParser::ExpectToken(const char* ExpectedToken)
-{
-  csString Buffer;
-  if (!GetNextToken(Buffer))
-  {
-    ReportError("Unexpected end of file. (expected \"%s\")", ExpectedToken);
-    return false;
-  }
-  if (strcmp(Buffer, ExpectedToken) != 0)
-  {
-    ReportError("Unexpected Token found. Expected \"%s\", found \"%s\"",
-                ExpectedToken, Buffer.GetData());
-    return false;
-  }
-  return true;
-}
 
-bool CMapParser::GetTextToken (csString& text)
+bool mcMapParser::GetTextToken (csString &val)
 {
-  if (!GetNextToken(text))
+  if (!GetNextToken(val))
   {
     ReportError("Unexpected end of file. (expected a text)");
     return false;
   }
+
   return true;
 }
 
-bool CMapParser::GetSafeToken (csString& str)
+
+int  mcMapParser::GetCurrentLine() 
 {
-  if (!GetNextToken(str))
-  {
-    ReportError("Unexpected end of file.");
-    return false;
-  }
-  return true;
+  return m_current_line;
 }
 
-void CMapParser::ReportError(const char* message, ...)
+
+void mcMapParser::ReportError(const char* message, ...)
 {
-  csPrintf("Error in line %d: ", m_CurrentLine);
+  csPrintf("Error in line %d: ", m_current_line);
   va_list args;
   va_start (args, message);
   csPrintfV (message, args);
   va_end (args);
   csPrintf("\n");
 }
+

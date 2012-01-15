@@ -64,7 +64,7 @@ CMapEntity::~CMapEntity()
 }
 
 
-bool CMapEntity::Read(CMapParser* pParser)
+bool CMapEntity::Read(mcMapParser* pParser)
 {
   csString buffer;
   csString key;
@@ -72,35 +72,21 @@ bool CMapEntity::Read(CMapParser* pParser)
 
   while (!finished)
   {
-    if (!pParser->GetSafeToken(buffer))
+    if (!pParser->GetTextToken(buffer))
     {
       return false;
     }
 
     if (buffer == "{")
     {
-      if (!pParser->PeekNextToken(buffer)) 
+      mcBrush* pBrush = new mcBrush();
+
+      if (!pBrush->Read(pParser)) 
       {
         return false;
       }
 
-      if (buffer == "(")
-      {
-        mcBrush* pBrush = new mcBrush();
-
-        if (!pBrush->Read(pParser)) 
-        {
-          return false;
-        }
-
-        m_Brushes.Push(pBrush);
-      }
-      else
-      {
-        pParser->ReportError("Format error! Expected \"(\" "
-                             ", Found\"%s\"", buffer.GetData());
-        return false;
-      }
+      m_Brushes.Push(pBrush);
     }
     else if (buffer == "}")
     {
@@ -113,7 +99,7 @@ bool CMapEntity::Read(CMapParser* pParser)
       //Now this seems to be a key/ value pair
       key = buffer;
 
-      if (!pParser->GetNextToken(buffer))
+      if (!pParser->GetTextToken(buffer))
       {
         pParser->ReportError("Format error. Keys and values for entities must"
                              "always come in pairs. "

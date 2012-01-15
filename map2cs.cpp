@@ -128,7 +128,7 @@ int AppMain (iObjectRegistry* object_reg)
   }
 
 
-  CMapFile map;
+  CMapFile map(object_reg);
   csPrintf("Reading map '%s'...\n", map_file);
 
   if (!map.Read(map_file))
