@@ -334,7 +334,7 @@ void CScriptParser::ReportError(const char* message,
   }
   else
   {
-    Msg1.Format (message);
+    Msg1.Format (message, NULL);
   }
   csPrintf ("Error in line %d: %s", m_CurrentLine, Msg1.GetData());
 }

@@ -59,10 +59,10 @@
 #include "ivideo/material.h"
 #include "ivideo/texture.h"
 #include "ivideo/txtmgr.h"
-#include "plugins/engine/3d/halo.h"
 #include "csutil/flags.h"
 #include "igeom/trimesh.h"
 #include "csgeom/tri.h"
+#include "csgeom/plane3.h"
 
 #include "cssaver.h"
 
