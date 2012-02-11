@@ -1,34 +1,7 @@
-/*
-    Map2cs: a convertor to convert the frequently used MAP format, into
-    something, that can be directly understood by Crystal Space.
-
-    Copyright (C) 1999 Thomas Hieber (thieber@gmx.net)
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
-#include <stdlib.h>
-#include <stdio.h>
-
-#include "cssysdef.h"
 #include "crystalspace.h"
-
-#include "map.h"
-#include "cworld.h"
+#include "imapconv.h"
 
 CS_IMPLEMENT_APPLICATION
-
 
 void PrintSyntax()
 {
@@ -41,7 +14,7 @@ void PrintSyntax()
 
 int AppMain (iObjectRegistry* object_reg)
 {
-  csWeakRef<iEngine> engine = csQueryRegistry<iEngine> (object_reg);
+  csRef<iEngine> engine = csQueryRegistry<iEngine> (object_reg);
   csRef<iVFS> vfs = csQueryRegistry<iVFS> (object_reg);
 
   if (!vfs)
@@ -112,34 +85,26 @@ int AppMain (iObjectRegistry* object_reg)
     }
   }
 
-  max_edge_len /= scale;
-
-
-  if(!vfs->Mount("/rc", rc_dir))
-  {
-    csPrintf("Failed to mount resource dir (%s)!\n", rc_dir);
-    return 1;
-  }
-
   if(!vfs->Mount ("/world", world_dir))
   {
     csPrintf("Failed to mount world dir (%s)!\n", world_dir);
     return 1;
   }
 
-
-  CMapFile map(object_reg);
+  csRef<iMapConv> map_conv = csQueryRegistry<iMapConv> (object_reg);
   csPrintf("Reading map '%s'...\n", map_file);
-
-  if (!map.Read(map_file))
+  if( !(map_conv->LoadMap(rc_dir, map_file)) )
   {
-    csPrintf("Failed to read map!\n", map_file);
-    return 2;
+    csPrintf("Failed to load map\n");
+    return 1;
   }
+  csPrintf("Done\n");
 
-  csPrintf("Generating data for world '%s'...\n", world_dir);
-  map.CreatePolygons(max_edge_len);
+  csPrintf("Compiling map '%s'...\n", map_file);
+  map_conv->CompileMap(rotate, scale, max_edge_len);
+  csPrintf("Done\n");
 
+/*
   csRef<iDocumentSystem> xml(csPtr <iDocumentSystem>
     (new csTinyDocumentSystem()));
   csRef <iDocument> doc = xml->CreateDocument();
@@ -149,16 +114,16 @@ int AppMain (iObjectRegistry* object_reg)
   world.Create(&map);
   world.Save(root);
 
-  csPrintf ("Writing world...\n");
+  csPrintf ("Writing world...\n"); */
 
   /* create a stub to ensure that directory will be created */
-  vfs->ChDir("/world/textures");
+/*  vfs->ChDir("/world/textures");
   vfs->WriteFile("stub", "abc\n", 4);
   vfs->DeleteFile("stub");
 
   doc->Write(vfs, "/world/world");
 
-  csPrintf("Done.\n");
+  csPrintf("Done.\n"); */
 
   return 0;
 }
@@ -189,6 +154,7 @@ int main (int argc, char *argv[])
 
   if (!csInitializer::RequestPlugins (object_reg,
                    CS_REQUEST_PLUGIN("crystalspace.level.saver2", iSaver),
+                   CS_REQUEST_PLUGIN("crystalspace.level.mapconv", iMapConv),
                                       CS_REQUEST_END))
   {
     return 1;

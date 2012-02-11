@@ -29,13 +29,13 @@ SRCDIR = .
 #------
 # Type of project: `exe' or `plugin'
 #------
-TARGET_TYPE = exe
-#TARGET_TYPE = plugin
+#TARGET_TYPE = exe
+TARGET_TYPE = plugin
 
 #------
 # Name of program or plugin
 #------
-TARGET_NAME = map2cs
+TARGET_NAME = mcmapconv
 
 ifeq ($(TARGET_TYPE),exe)
   TARGET=$(TARGET_NAME)$(EXE)
@@ -46,7 +46,13 @@ endif
 #------
 # Location of sources and object files
 #------
-SRC=$(wildcard *.cpp)
+SRC=mcbrush.cpp      \
+    mcmapconv.cpp    \
+    mcmapentity.cpp  \
+    mcmapfile.cpp    \
+    mparser.cpp      \
+    mpoly.cpp        \
+    texplane.cpp
 OBJS=$(addsuffix .o, $(basename $(SRC)))
 OUT=.
 
@@ -70,7 +76,7 @@ CFLAGS.I = -I
 # Make sure to update the required libraries for your own project
 #------
 CFLAGS := $(shell cs-config --cflags) -g
-CXXFLAGS := $(shell cs-config --cxxflags) -g -DCS_DEBUG -Iinclude
+CXXFLAGS := $(shell cs-config --cxxflags) -g -DCS_DEBUG -I../include
 LINKFLAGS := $(shell cs-config --libs crystalspace) -g
 
 DO.SHARED.PLUGIN.CORE=$(LINK) $(LFLAGS.DLL) -o $@ $^ $(PLUGIN.POSTFLAGS)

@@ -70,7 +70,7 @@ CFLAGS.I = -I
 # Make sure to update the required libraries for your own project
 #------
 CFLAGS := $(shell cs-config --cflags) -g
-CXXFLAGS := $(shell cs-config --cxxflags) -g -DCS_DEBUG -I/home/dora/projects/planeshift/cs
+CXXFLAGS := $(shell cs-config --cxxflags) -g -DCS_DEBUG
 LINKFLAGS := $(shell cs-config --libs crystalspace) -g
 
 DO.SHARED.PLUGIN.CORE=$(LINK) $(LFLAGS.DLL) -o $@ $^ $(PLUGIN.POSTFLAGS)

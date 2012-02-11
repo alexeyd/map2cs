@@ -25,7 +25,7 @@
 
 #include "crystalspace.h"
 #include "map.h"
-#include "brush.h"
+#include "mcbrush.h"
 #include "entity.h"
 #include "mpoly.h"
 #include "texplane.h"

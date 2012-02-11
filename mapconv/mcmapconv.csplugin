@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<!-- cssaver.csplugin -->
+<plugin>
+  <scf>
+    <classes>
+      <class>
+        <name>crystalspace.level.mapconv</name>
+        <implementation>mcMapConv</implementation>
+        <description>Create level objects from .MAP</description>
+        <requires>
+          <class>crystalspace.kernel.</class>
+        </requires>
+      </class>
+    </classes>
+  </scf>
+</plugin>
+

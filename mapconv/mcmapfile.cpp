@@ -1,72 +1,38 @@
-/*
-    Map2cs: a convertor to convert the frequently used MAP format, into
-    something, that can be directly understood by Crystal Space.
+#include "mcmapfile.h"
 
-    Copyright (C) 1999 Thomas Hieber (thieber@gmx.net)
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
-
-#include "cssysdef.h"
-#include "map.h"
-#include "entity.h"
-#include "mparser.h"
-#include "texplane.h"
-#include "mpoly.h"
-
-CMapFile::CMapFile(iObjectRegistry *object_reg)
+mcMapFile::mcMapFile(iObjectRegistry *object_reg)
 {
-  m_NumBrushes  = 0;
   m_object_reg = object_reg;
 }
 
 
-CMapFile::~CMapFile()
+mcMapFile::~mcMapFile()
 {
-  for(size_t i = 0; i < m_Entities.GetSize(); ++i)
-  {
-    delete m_Entities[i];
-  }
 }
 
 
-bool CMapFile::Read(const char* filename)
+bool mcMapFile::Read(const char* filename)
 {
   mcMapParser parser(m_object_reg);
   csString buffer;
-
-  m_NumBrushes  = 0;
 
   if (!parser.Open(filename))
   {
     return false;
   }
 
-
   while (parser.GetTextToken(buffer))
   {
-    if (strcmp(buffer, "{") == 0)
+    if (buffer == "{")
     {
-      //a new entity follows.
-      CMapEntity* pEntity = new CMapEntity;
-      if (!pEntity->Read(&parser))
+      mcMapEntity entity(0);
+
+      if (!entity.Read(&parser))
       {
         return false;
       }
-      m_Entities.Push(pEntity);
-      m_NumBrushes += pEntity->GetNumBrushes();
+
+      m_entities.Push(entity);
     }
     else
     {
@@ -77,21 +43,29 @@ bool CMapFile::Read(const char* filename)
     }
   }
 
-  csPrintf("Map contains:\n");
-  csPrintf("%zu Entites\n", m_Entities.GetSize());
-  csPrintf("%zu Brushes\n", m_NumBrushes);
+  csPrintf("Map contains %zu entites\n", m_entities.GetSize());
 
   return true;
 }
 
 
-void CMapFile::CreatePolygons(double max_edge_length)
+void mcMapFile::CreatePolygons(double max_edge_length)
 {
-  size_t i;
-
-  for (i=0; i<m_Entities.GetSize(); i++)
+  for (size_t i=0; i<m_entities.GetSize(); i++)
   {
-    m_Entities[i]->CreatePolygons(max_edge_length);
+    m_entities[i].CreatePolygons(max_edge_length);
   }
+}
+
+
+size_t mcMapFile::GetNumEntities() const
+{
+  return m_entities.GetSize();
+}
+
+
+const mcMapEntity& mcMapFile::GetEntity(size_t index) const
+{
+  return m_entities[index];
 }
 
