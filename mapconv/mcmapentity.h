@@ -16,7 +16,8 @@ class mcMapEntity : public scfImplementation1<mcMapEntity, iMapEntity>
     csArray<mcBrush> m_brushes;
  
   public:
-    mcMapEntity(iBase *p);
+    mcMapEntity();
+    mcMapEntity(const mcMapEntity& other);
     virtual ~mcMapEntity();
 
     virtual const char* GetName() const;

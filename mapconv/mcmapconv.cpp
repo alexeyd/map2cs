@@ -44,6 +44,8 @@ bool mcMapConv::LoadMap(const char *resource_dir,
     csPrintf("Failed to read map!\n", map_filename);
     return false;
   }
+
+  return true;
 }
 
 

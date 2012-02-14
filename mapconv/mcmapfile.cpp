@@ -21,14 +21,15 @@ bool mcMapFile::Read(const char* filename)
     return false;
   }
 
-  while (parser.GetTextToken(buffer))
+  while (parser.GetNextToken(buffer))
   {
     if (buffer == "{")
     {
-      mcMapEntity entity(0);
+      mcMapEntity entity;
 
       if (!entity.Read(&parser))
       {
+        csPrintf("Failed to read entity\n");
         return false;
       }
 

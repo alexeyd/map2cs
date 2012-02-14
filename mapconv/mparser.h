@@ -43,6 +43,7 @@ public:
 
   bool Open(const char* filename);
   
+  bool GetNextToken(csString& str);
   bool GetIntToken(int &val);
   bool GetFloatToken(double &val);
   bool GetTextToken(csString &str);
@@ -52,7 +53,6 @@ public:
   void ReportError (const char* message, ...);
 
 protected:
-  bool GetNextToken(csString& str);
 
   bool GetChar(char &c);
   bool PeekChar(char &c);
