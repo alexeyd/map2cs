@@ -1,18 +1,18 @@
-#ifndef NULLTEX_PROXY_H
-#define NULLTEX_PROXY_H
+#ifndef __MC_NULLTEXPROXY_H__
+#define __MC_NULLTEXPROXY_H__
 
 #include <crystalspace.h>
 
 /* That's a hack to be able to save texture filename while
  * using NULL3D render plugin */
 
-class csNulltexProxy 
-: public scfImplementation1<csNulltexProxy, iTextureHandle>
+class mcNulltexProxy 
+: public scfImplementation1<mcNulltexProxy, iTextureHandle>
 {
   public:
-    csNulltexProxy(csRef<iTextureHandle> real_handle,
+    mcNulltexProxy(csRef<iTextureHandle> real_handle,
                    const csString& image_name);
-    virtual ~csNulltexProxy();
+    virtual ~mcNulltexProxy();
 
 
   virtual int GetFlags () const;
@@ -51,5 +51,5 @@ class csNulltexProxy
     csString image_name;
 };
 
-#endif
+#endif // __MC_NULLTEXPROXY_H__
 

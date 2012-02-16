@@ -158,8 +158,8 @@ void CCSWorld::CreateMeshFromBrush(mcBrush *brush, csString name)
       csString new_texture_filename;
       new_texture_filename.Format("textures/%s", texture_filename.GetData());
 
-      csNulltexProxy *nulltex_proxy  = 
-        new csNulltexProxy(texture->GetTextureHandle(),
+      mcNulltexProxy *nulltex_proxy  = 
+        new mcNulltexProxy(texture->GetTextureHandle(),
                            new_texture_filename);
 
       texture->SetTextureHandle(nulltex_proxy);

@@ -1,7 +1,7 @@
-#include "nulltex_proxy.h"
+#include "mcnulltexproxy.h"
 
 
-csNulltexProxy::csNulltexProxy(csRef<iTextureHandle> real_handle,
+mcNulltexProxy::mcNulltexProxy(csRef<iTextureHandle> real_handle,
                                const csString& image_name)
 : scfImplementationType(this)
 {
@@ -9,36 +9,36 @@ csNulltexProxy::csNulltexProxy(csRef<iTextureHandle> real_handle,
   this->image_name = image_name;
 }
 
-csNulltexProxy::~csNulltexProxy()
+mcNulltexProxy::~mcNulltexProxy()
 {
 }
 
 
-int csNulltexProxy::GetFlags () const
+int mcNulltexProxy::GetFlags () const
 {
   return real_handle->GetFlags();
 }
 
 
-void csNulltexProxy::SetKeyColor (bool Enable)
+void mcNulltexProxy::SetKeyColor (bool Enable)
 {
   real_handle->SetKeyColor(Enable);
 }
 
 
-void csNulltexProxy::SetKeyColor (uint8 red, uint8 green, uint8 blue)
+void mcNulltexProxy::SetKeyColor (uint8 red, uint8 green, uint8 blue)
 {
   real_handle->SetKeyColor(red, green, blue);
 }
 
 
-bool csNulltexProxy::GetKeyColor () const
+bool mcNulltexProxy::GetKeyColor () const
 {
   return real_handle->GetKeyColor();
 }
 
 
-void csNulltexProxy::GetKeyColor (uint8 &red, 
+void mcNulltexProxy::GetKeyColor (uint8 &red, 
                                    uint8 &green, 
                                    uint8 &blue) const
 {
@@ -46,86 +46,86 @@ void csNulltexProxy::GetKeyColor (uint8 &red,
 }
 
 
-bool csNulltexProxy::GetRendererDimensions (int &mw, int &mh)
+bool mcNulltexProxy::GetRendererDimensions (int &mw, int &mh)
 {
   return real_handle->GetRendererDimensions(mw, mh);
 }
 
 
-void csNulltexProxy::GetOriginalDimensions (int& mw, int& mh)
+void mcNulltexProxy::GetOriginalDimensions (int& mw, int& mh)
 {
   real_handle->GetOriginalDimensions(mw, mh);
 }
 
 
-bool csNulltexProxy::GetRendererDimensions (int &mw, int &mh, int &md)
+bool mcNulltexProxy::GetRendererDimensions (int &mw, int &mh, int &md)
 {
   return real_handle->GetRendererDimensions(mw, mh, md);
 }
 
 
-void csNulltexProxy::GetOriginalDimensions (int& mw, int& mh, int &md)
+void mcNulltexProxy::GetOriginalDimensions (int& mw, int& mh, int &md)
 {
   real_handle->GetOriginalDimensions(mw, mh, md);
 }
 
 
-void csNulltexProxy::Blit (int x, int y, int width, int height,
+void mcNulltexProxy::Blit (int x, int y, int width, int height,
                             unsigned char const* data, 
                             TextureBlitDataFormat format)
 {
   real_handle->Blit(x, y, width, height, data, format);
 }
 
-const char* csNulltexProxy::GetImageName () const
+const char* mcNulltexProxy::GetImageName () const
 {
   return image_name.GetData();
 }
 
 
-csAlphaMode::AlphaType csNulltexProxy::GetAlphaType () const
+csAlphaMode::AlphaType mcNulltexProxy::GetAlphaType () const
 {
   return real_handle->GetAlphaType();
 }
 
 
-void csNulltexProxy::Precache ()
+void mcNulltexProxy::Precache ()
 {
   real_handle->Precache();
 }
 
 
-bool csNulltexProxy::IsPrecached ()
+bool mcNulltexProxy::IsPrecached ()
 {
   return real_handle->IsPrecached();
 }
 
 
-void csNulltexProxy::SetTextureClass (const char* className)
+void mcNulltexProxy::SetTextureClass (const char* className)
 {
   real_handle->SetTextureClass(className);
 }
 
 
-const char* csNulltexProxy::GetTextureClass ()
+const char* mcNulltexProxy::GetTextureClass ()
 {
   return real_handle->GetTextureClass();
 }
 
 
-void csNulltexProxy::SetAlphaType (csAlphaMode::AlphaType alphaType)
+void mcNulltexProxy::SetAlphaType (csAlphaMode::AlphaType alphaType)
 {
   real_handle->SetAlphaType(alphaType);
 }
 
 
-iTextureHandle::TextureType csNulltexProxy::GetTextureType() const
+iTextureHandle::TextureType mcNulltexProxy::GetTextureType() const
 {
   return real_handle->GetTextureType();
 }
 
 
-uint8* csNulltexProxy::QueryBlitBuffer (int x, int y, int width, int height,
+uint8* mcNulltexProxy::QueryBlitBuffer (int x, int y, int width, int height,
                                          size_t& pitch, 
                                          TextureBlitDataFormat format,
                                          uint bufFlags)
@@ -135,32 +135,32 @@ uint8* csNulltexProxy::QueryBlitBuffer (int x, int y, int width, int height,
 }
 
 
-void csNulltexProxy::ApplyBlitBuffer (uint8* buf)
+void mcNulltexProxy::ApplyBlitBuffer (uint8* buf)
 {
   real_handle->ApplyBlitBuffer(buf);
 }
 
 
-iTextureHandle::BlitBufferNature csNulltexProxy::GetBufferNature (uint8* buf)
+iTextureHandle::BlitBufferNature mcNulltexProxy::GetBufferNature (uint8* buf)
 {
   return real_handle->GetBufferNature(buf);
 }
 
 
-void csNulltexProxy::SetMipmapLimits (int maxMip, int minMip)
+void mcNulltexProxy::SetMipmapLimits (int maxMip, int minMip)
 {
   real_handle->SetMipmapLimits(maxMip, minMip);
 }
 
 
-void csNulltexProxy::GetMipmapLimits (int& maxMip, int& minMip)
+void mcNulltexProxy::GetMipmapLimits (int& maxMip, int& minMip)
 {
   real_handle->GetMipmapLimits(maxMip, minMip);
 }
 
 
 csPtr<iDataBuffer> 
-csNulltexProxy::Readback (const CS::StructuredTextureFormat& format, 
+mcNulltexProxy::Readback (const CS::StructuredTextureFormat& format, 
                            int mip)
 {
   return real_handle->Readback(format, mip);
