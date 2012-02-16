@@ -4,7 +4,7 @@
 #include "imapconv.h"
 
 #include "mcbrush.h"
-#include "mparser.h"
+#include "mcmapparser.h"
 
 class mcMapEntity : public scfImplementation1<mcMapEntity, iMapEntity>
 {

@@ -50,7 +50,7 @@ SRC=mcbrush.cpp      \
     mcmapconv.cpp    \
     mcmapentity.cpp  \
     mcmapfile.cpp    \
-    mparser.cpp      \
+    mcmapparser.cpp  \
     mpoly.cpp        \
     texplane.cpp
 OBJS=$(addsuffix .o, $(basename $(SRC)))

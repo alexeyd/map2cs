@@ -2,7 +2,7 @@
 #define __MC_BRUSH_H__
 
 #include "crystalspace.h"
-#include "mparser.h"
+#include "mcmapparser.h"
 #include "texplane.h"
 #include "mpoly.h"
 
