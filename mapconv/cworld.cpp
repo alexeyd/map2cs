@@ -178,7 +178,7 @@ void CCSWorld::CreateMeshFromBrush(mcBrush *brush, csString name)
       csVector3 origin, first, second;
       double first_len, second_len, l1, l2;
       csMatrix3 tex_mat;
-      const CMapTexturedPlane *plane;
+      const mcMapTexturedPlane *plane;
 
       const mcPolygon *polygon = subbrush->m_polygons.Get(j);
       plane = polygon->GetBaseplane();

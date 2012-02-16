@@ -137,9 +137,9 @@ bool mcBrush::Read(mcMapParser* parser)
       }
     }
 
-    m_planes.Push(CMapTexturedPlane(v1, v2, v3, texture_name,
-                                    x_off, y_off, rot_angle, 
-                                    x_scale, y_scale));
+    m_planes.Push(mcMapTexturedPlane(v1, v2, v3, texture_name,
+                                     x_off, y_off, rot_angle, 
+                                     x_scale, y_scale));
   }
 
   return true;

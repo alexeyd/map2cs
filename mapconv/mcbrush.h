@@ -1,9 +1,10 @@
 #ifndef __MC_BRUSH_H__
 #define __MC_BRUSH_H__
 
-#include "crystalspace.h"
+#include <crystalspace.h>
+
 #include "mcmapparser.h"
-#include "texplane.h"
+#include "mcmaptexturedplane.h"
 #include "mpoly.h"
 
 
@@ -20,10 +21,6 @@ class mcBrush
 
   protected:
 
-    void CheckPlanes(const CMapTexturedPlane &plane1,
-                     const CMapTexturedPlane &plane2,
-                     const CMapTexturedPlane &plane3);
-
     /**
       * Reads three integer values from the parser and stores them inside a
       * vector3. Will also do error handling and error messages.
@@ -33,7 +30,7 @@ class mcBrush
     bool ReadVector(mcMapParser* parser, csDVector3& v);
 
 
-    csArray<CMapTexturedPlane> m_planes;
+    csArray<mcMapTexturedPlane> m_planes;
     csArray<mcPolygon> m_polygons;
 };
 

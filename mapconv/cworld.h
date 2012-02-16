@@ -28,7 +28,7 @@
 #include "mcbrush.h"
 #include "entity.h"
 #include "mpoly.h"
-#include "texplane.h"
+#include "mcmaptexturedplane.h"
 #include "mcnulltexproxy.h"
 
 class CCSWorld

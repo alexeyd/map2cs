@@ -1,25 +1,4 @@
-/*
-    Map2cs: a convertor to convert the frequently used MAP format, into
-    something, that can be directly understood by Crystal Space.
-
-    Copyright (C) 1999 Thomas Hieber (thieber@gmx.net)
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
-
-#include "texplane.h"
+#include "mcmaptexturedplane.h"
 
 
 const mcTexDef& mcTexDef::operator= (const mcTexDef &other)
@@ -144,7 +123,7 @@ csVector2 mcTexDef::TexCoords(const csVector3 vertex,
 
 
 
-CMapTexturedPlane::CMapTexturedPlane(const csDVector3 &v0, 
+mcMapTexturedPlane::mcMapTexturedPlane(const csDVector3 &v0, 
                                      const csDVector3 &v1,
                                      const csDVector3 &v2,
                                      const csString &texture_name,
@@ -166,19 +145,19 @@ CMapTexturedPlane::CMapTexturedPlane(const csDVector3 &v0,
 }
 
 
-CMapTexturedPlane::CMapTexturedPlane(const CMapTexturedPlane &other)
+mcMapTexturedPlane::mcMapTexturedPlane(const mcMapTexturedPlane &other)
 {
   (*this) = other;
 }
 
 
-CMapTexturedPlane::~CMapTexturedPlane()
+mcMapTexturedPlane::~mcMapTexturedPlane()
 {
 }
 
 
-const CMapTexturedPlane& 
-CMapTexturedPlane::operator = (const CMapTexturedPlane &other)
+const mcMapTexturedPlane& 
+mcMapTexturedPlane::operator = (const mcMapTexturedPlane &other)
 {
   if(&other == this)
   {
@@ -193,19 +172,19 @@ CMapTexturedPlane::operator = (const CMapTexturedPlane &other)
 }
 
 
-const csString& CMapTexturedPlane::GetTextureName() const
+const csString& mcMapTexturedPlane::GetTextureName() const
 {
   return m_texture_name;
 }
 
 
-const csDPlane& CMapTexturedPlane::GetPlane() const
+const csDPlane& mcMapTexturedPlane::GetPlane() const
 {
   return m_plane;
 }
 
 
-const mcTexDef& CMapTexturedPlane::GetTexDef() const
+const mcTexDef& mcMapTexturedPlane::GetTexDef() const
 {
   return m_texdef;
 }

@@ -46,13 +46,13 @@ endif
 #------
 # Location of sources and object files
 #------
-SRC=mcbrush.cpp      \
-    mcmapconv.cpp    \
-    mcmapentity.cpp  \
-    mcmapfile.cpp    \
-    mcmapparser.cpp  \
-    mpoly.cpp        \
-    texplane.cpp
+SRC=mcbrush.cpp            \
+    mcmapconv.cpp          \
+    mcmapentity.cpp        \
+    mcmapfile.cpp          \
+    mcmapparser.cpp        \
+    mpoly.cpp              \
+    mcmaptexturedplane.cpp
 OBJS=$(addsuffix .o, $(basename $(SRC)))
 OUT=.
 
