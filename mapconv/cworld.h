@@ -23,11 +23,12 @@
 #ifndef __CWORLD_H__
 #define __CWORLD_H__
 
-#include "crystalspace.h"
+#include <crystalspace.h>
+
 #include "map.h"
 #include "mcbrush.h"
 #include "entity.h"
-#include "mpoly.h"
+#include "mcpolygon.h"
 #include "mcmaptexturedplane.h"
 #include "mcnulltexproxy.h"
 

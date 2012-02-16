@@ -51,7 +51,7 @@ SRC=mcbrush.cpp            \
     mcmapentity.cpp        \
     mcmapfile.cpp          \
     mcmapparser.cpp        \
-    mpoly.cpp              \
+    mcpolygon.cpp          \
     mcmaptexturedplane.cpp
 OBJS=$(addsuffix .o, $(basename $(SRC)))
 OUT=.

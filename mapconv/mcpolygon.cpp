@@ -1,4 +1,4 @@
-#include "mpoly.h"
+#include "mcpolygon.h"
 
 static inline int DominantAxis(const csDVector3 &v)
 {

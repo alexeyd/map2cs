@@ -1,5 +1,5 @@
-#ifndef __MPOLY_H__
-#define __MPOLY_H__
+#ifndef __MC_POLYGON_H__
+#define __MC_POLYGON_H__
 
 #include <crystalspace.h>
 
@@ -34,5 +34,5 @@ class mcPolygon
     const csArray<csTriangle>& GetTriangles() const;
 };
 
-#endif // __MPOLY_H__
+#endif // __MC_POLYGON_H__
 

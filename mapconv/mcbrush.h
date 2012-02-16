@@ -5,7 +5,7 @@
 
 #include "mcmapparser.h"
 #include "mcmaptexturedplane.h"
-#include "mpoly.h"
+#include "mcpolygon.h"
 
 
 class mcBrush
