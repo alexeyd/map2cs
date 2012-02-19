@@ -4,7 +4,7 @@ int mcMapEntity::s_entity_count = 0;
 
 
 mcMapEntity::mcMapEntity()
-: scfImplementationType(this, 0)
+: scfImplementationType(this)
 {
   ++s_entity_count;
   m_unique_name.Format ("e%d", s_entity_count);
@@ -12,7 +12,7 @@ mcMapEntity::mcMapEntity()
 
 
 mcMapEntity::mcMapEntity(const mcMapEntity& other)
-: scfImplementationType(this, 0)
+: scfImplementationType(this)
 {
   m_unique_name = other.m_unique_name;
   m_key_value_map = other.m_key_value_map;

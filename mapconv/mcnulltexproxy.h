@@ -47,8 +47,8 @@ class mcNulltexProxy
     Readback (const CS::StructuredTextureFormat& format, int mip = 0);
 
   private:
-    csRef<iTextureHandle> real_handle;
-    csString image_name;
+    csRef<iTextureHandle> m_real_handle;
+    csString m_image_name;
 };
 
 #endif // __MC_NULLTEXPROXY_H__

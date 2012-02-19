@@ -1,47 +1,108 @@
-#include "crystalspace.h"
+#include <crystalspace.h>
+
 #include "imapconv.h"
 
-CS_IMPLEMENT_APPLICATION
-
-void PrintSyntax()
+class Map2CSApp : public csApplicationFramework
 {
-  csPrintf("Syntax: map2cs -rc=<resource_dir> "
-           "-map=<mapfile> -world=<world_dir> "
-           "[-[no]rotate] [-ambient=\"<float_r>, <float_g>, <float_b>\"] "
-           "[-scale=<float>] [-max_edge_len=<float>]\n\n");
+  private:
+    csRef<iEngine> m_engine;
+    csRef<iVFS> m_vfs;
+    csRef<iCommandLineParser> m_args_parser;
+
+  public:
+    Map2CSApp();
+
+    virtual void OnCommandLineHelp();
+    virtual bool OnInitialize(int argc, char* argv[]);
+    virtual bool Application();
+};
+
+
+Map2CSApp::Map2CSApp()
+{
 }
 
 
-int AppMain (iObjectRegistry* object_reg)
+void Map2CSApp::OnCommandLineHelp()
 {
-  csRef<iEngine> engine = csQueryRegistry<iEngine> (object_reg);
-  csRef<iVFS> vfs = csQueryRegistry<iVFS> (object_reg);
+  csPrintf("Syntax: map2cs -rc=<resource_dir> \n"
+           "               -map=<mapfile> -world=<world_dir> [-[no]rotate]\n"
+           "               [-ambient=\"<float_r>, <float_g>, <float_b>\"]\n"
+           "               [-scale=<float>] [-max_edge_len=<float>]\n");
+}
 
-  if (!vfs)
+
+bool Map2CSApp::OnInitialize(int argc, char* argv[])
+{
+  if (!RequestPlugins (object_reg,
+    CS_REQUEST_VFS,
+    CS_REQUEST_NULL3D,
+    CS_REQUEST_ENGINE,
+    CS_REQUEST_FONTSERVER,
+    CS_REQUEST_IMAGELOADER,
+    CS_REQUEST_LEVELLOADER,
+    CS_REQUEST_REPORTER,
+    CS_REQUEST_REPORTERLISTENER,
+    CS_REQUEST_PLUGIN("crystalspace.graphics3d.shadermanager", iShaderManager),
+    CS_REQUEST_END))
   {
-    csPrintf ("Couldn't load VFS!\n");
-    return 1;
+    return false;
   }
 
-  csRef<iCommandLineParser> args_parser = 
-    csQueryRegistry<iCommandLineParser> (object_reg);
+  m_engine = csQueryRegistry<iEngine> (object_reg);
+  m_vfs = csQueryRegistry<iVFS> (object_reg);
+  m_args_parser = csQueryRegistry<iCommandLineParser> (object_reg);
 
-  const char *rc_dir = args_parser->GetOption("rc");
-  const char *map_file = args_parser->GetOption("map");
-  const char *world_dir = args_parser->GetOption("world");
-  const char *ambient_color = args_parser->GetOption("ambient");
-  const char *scale_text = args_parser->GetOption("scale");
-  const char *max_edge_len_text = args_parser->GetOption("max_edge_len");
-  bool rotate = args_parser->GetBoolOption("rotate", true);
+  m_engine->SetSaveableFlag(true);
+
+  if (!RequestPlugins (object_reg,
+                   CS_REQUEST_PLUGIN("crystalspace.level.saver2", iSaver),
+                   CS_REQUEST_PLUGIN("crystalspace.level.mapconv", iMapConv),
+                   CS_REQUEST_END))
+  {
+    return false;
+  }
+
+  return true;
+}
+
+
+bool Map2CSApp::Application()
+{
+  const char *rc_dir = m_args_parser->GetOption("rc");
+  const char *map_file = m_args_parser->GetOption("map");
+  const char *world_dir = m_args_parser->GetOption("world");
+  const char *ambient_color = m_args_parser->GetOption("ambient");
+  const char *scale_text = m_args_parser->GetOption("scale");
+  const char *max_edge_len_text = m_args_parser->GetOption("max_edge_len");
+  bool rotate = m_args_parser->GetBoolOption("rotate", true);
 
   float scale = 1.0;
   double max_edge_len = 8.0;
 
-  if (!rc_dir || !map_file || !world_dir)
+
+  if (!OpenApplication (GetObjectRegistry ()))
   {
-    csPrintf("Incorrect syntax!\n");
-    PrintSyntax();
-    return 1;
+    ReportError ("Error opening system!");
+    return false;
+  }
+
+  if(!rc_dir)
+  {
+    ReportError("You should specify resource dir!\n");
+    return false;
+  }
+
+  if(!map_file)
+  {
+    ReportError("You should specify map file!\n");
+    return false;
+  }
+
+  if(!world_dir)
+  {
+    ReportError("You should specify world dir!\n");
+    return false;
   }
 
   if(ambient_color)
@@ -49,11 +110,12 @@ int AppMain (iObjectRegistry* object_reg)
     float r, g, b;
     if(sscanf(ambient_color, "%f, %f, %f\n", &r, &g, &b) == 3)
     {
-      engine->SetAmbientLight(csColor(r, g, b));
+      m_engine->SetAmbientLight(csColor(r, g, b));
     }
     else
     {
-      csPrintf("Failed to parse ambient string!\n");
+      ReportError("Failed to parse ambient string (%s)!\n", ambient_color);
+      return false;
     }
   }
 
@@ -67,7 +129,8 @@ int AppMain (iObjectRegistry* object_reg)
     }
     else
     {
-      csPrintf("Incorrect scale value (%s)!\n", scale_text);
+      ReportError("Incorrect scale value (%s)!\n", scale_text);
+      return false;
     }
   }
 
@@ -81,28 +144,29 @@ int AppMain (iObjectRegistry* object_reg)
     }
     else
     {
-      csPrintf("Incorrect max_edge_len value (%s)!\n", max_edge_len_text);
+      ReportError("Incorrect max_edge_len value (%s)!\n", max_edge_len_text);
+      return false;
     }
   }
 
-  if(!vfs->Mount ("/world", world_dir))
+  if(!m_vfs->Mount ("/world", world_dir))
   {
-    csPrintf("Failed to mount world dir (%s)!\n", world_dir);
-    return 1;
+    ReportError("Failed to mount world dir (%s)!\n", world_dir);
+    return false;
   }
 
   csRef<iMapConv> map_conv = csQueryRegistry<iMapConv> (object_reg);
-  csPrintf("Reading map '%s'...\n", map_file);
+  ReportInfo("Reading map '%s'...\n", map_file);
   if( !(map_conv->LoadMap(rc_dir, map_file)) )
   {
-    csPrintf("Failed to load map\n");
+    ReportError("Failed to load map!\n");
     return 1;
   }
-  csPrintf("Done\n");
+  ReportInfo("Done\n");
 
-  csPrintf("Compiling map '%s'...\n", map_file);
+  ReportInfo("Compiling map '%s'...\n", map_file);
   map_conv->CompileMap(rotate, scale, max_edge_len);
-  csPrintf("Done\n");
+  ReportInfo("Done\n");
 
 /*
   csRef<iDocumentSystem> xml(csPtr <iDocumentSystem>
@@ -125,46 +189,15 @@ int AppMain (iObjectRegistry* object_reg)
 
   csPrintf("Done.\n"); */
 
-  return 0;
+  return true;
 }
+
+
+CS_IMPLEMENT_APPLICATION
 
 
 int main (int argc, char *argv[])
 {
-  // this is required for the image loader
-  iObjectRegistry* object_reg = csInitializer::CreateEnvironment (argc, argv);
-  if (!object_reg) return false;
-  if (!csInitializer::RequestPlugins (object_reg,
-    CS_REQUEST_VFS,
-    CS_REQUEST_NULL3D,
-    CS_REQUEST_ENGINE,
-    CS_REQUEST_FONTSERVER,
-    CS_REQUEST_IMAGELOADER,
-    CS_REQUEST_LEVELLOADER,
-    CS_REQUEST_REPORTER,
-    CS_REQUEST_REPORTERLISTENER,
-    CS_REQUEST_PLUGIN("crystalspace.graphics3d.shadermanager", iShaderManager),
-    CS_REQUEST_END))
-  {
-    return 1;
-  }
-
-  csWeakRef<iEngine> engine = csQueryRegistry<iEngine> (object_reg);
-  engine->SetSaveableFlag(true);
-
-  if (!csInitializer::RequestPlugins (object_reg,
-                   CS_REQUEST_PLUGIN("crystalspace.level.saver2", iSaver),
-                   CS_REQUEST_PLUGIN("crystalspace.level.mapconv", iMapConv),
-                                      CS_REQUEST_END))
-  {
-    return 1;
-  }
-
-
-  int ret = AppMain (object_reg);
-  
-  csInitializer::DestroyApplication (object_reg);
-
-  return ret;
+  return csApplicationRunner<Map2CSApp>::Run(argc, argv);
 }
 
