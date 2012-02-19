@@ -63,9 +63,10 @@ bool Map2CSApp::OnInitialize(int argc, char* argv[])
   m_engine->SetSaveableFlag(true);
 
   if (!RequestPlugins (object_reg,
-                   CS_REQUEST_PLUGIN("crystalspace.level.saver2", iSaver),
-                   CS_REQUEST_PLUGIN("crystalspace.level.mapconv", iMapConv),
-                   CS_REQUEST_END))
+      CS_REQUEST_PLUGIN("crystalspace.documentsystem.tinyxml", iDocumentSystem),
+      CS_REQUEST_PLUGIN("crystalspace.level.saver2", iSaver),
+      CS_REQUEST_PLUGIN("crystalspace.level.mapconv", iMapConv),
+      CS_REQUEST_END))
   {
     return false;
   }
@@ -312,26 +313,23 @@ bool Map2CSApp::Application()
   }
   ReportInfo("Done\n");
 
-/*
-  csRef<iDocumentSystem> xml(csPtr <iDocumentSystem>
-    (new csTinyDocumentSystem()));
+
+  csRef<iSaver> saver = csQueryRegistry<iSaver> (object_reg);
+  csRef<iDocumentSystem> xml = csQueryRegistry<iDocumentSystem>(object_reg);
   csRef <iDocument> doc = xml->CreateDocument();
   csRef <iDocumentNode> root = doc->CreateRoot();
 
-  CCSWorld world(object_reg, rotate, scale);
-  world.Create(&map);
-  world.Save(root);
+  saver->SaveMapFile(root);
 
-  csPrintf ("Writing world...\n"); */
+  ReportInfo("Writing world...\n");
 
   /* create a stub to ensure that directory will be created */
-/*  vfs->ChDir("/world/textures");
-  vfs->WriteFile("stub", "abc\n", 4);
-  vfs->DeleteFile("stub");
+  m_vfs->ChDir("/world/textures");
+  m_vfs->WriteFile("map2cs_stub", "abc\n", 4);
 
-  doc->Write(vfs, "/world/world");
+  doc->Write(m_vfs, "/world/world");
 
-  csPrintf("Done.\n"); */
+  ReportInfo("Done.\n");
 
   return true;
 }
