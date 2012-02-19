@@ -327,7 +327,7 @@ void mcMapConv::CompileMap(bool rotate, float scale,
 }
 
 
-const iMapEntity* mcMapConv::GetMapEnitity(size_t index) const
+const iMapEntity* mcMapConv::GetMapEntity(size_t index) const
 {
   return &(m_map_file->GetEntity(index));
 }

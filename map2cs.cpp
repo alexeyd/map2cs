@@ -2,12 +2,19 @@
 
 #include "imapconv.h"
 
+const double MAX_WORLD_COORD = 65536.0;
+const double MIN_WORLD_COORD = -65536.0;
+
 class Map2CSApp : public csApplicationFramework
 {
   private:
     csRef<iEngine> m_engine;
     csRef<iVFS> m_vfs;
     csRef<iCommandLineParser> m_args_parser;
+
+
+    void AddLight(const iMapEntity *entity, bool rotate, float scale);
+    void AddStart(const iMapEntity *entity, bool rotate, float scale);
 
   public:
     Map2CSApp();
@@ -64,6 +71,125 @@ bool Map2CSApp::OnInitialize(int argc, char* argv[])
   }
 
   return true;
+}
+
+
+void Map2CSApp::AddLight(const iMapEntity *entity, bool rotate, float scale)
+{
+  csVector3 position;
+  double x, y, z;
+  double radius;
+
+  bool is_directional = false;
+  csVector3 target;
+
+  if(sscanf(entity->GetValue("light"), "%lf", &radius) != 1)
+  {
+    radius = 0.0;
+  }
+
+  if(fabs(radius) < SMALL_EPSILON)
+  {
+    radius = MAX_WORLD_COORD;
+  }
+
+  if(sscanf(entity->GetValue("origin"), "%lf %lf %lf", &x, &y, &z) == 3)
+  {
+    if(rotate)
+    {
+      position.Set(x, z, y);
+    }
+    else
+    {
+      position.Set(x, y, z);
+    }
+  }
+  else
+  {
+    position.Set(0.0, 0.0, 0.0);
+  }
+
+  csString sun_string = entity->GetValue("_sun");
+
+  if(sun_string == "yes" || sun_string == "true" || sun_string =="1")
+  {
+    if(sscanf(entity->GetValue("target"), "%lf %lf %lf", &x, &y, &z) == 3)
+    {
+      if(rotate)
+      {
+        target.Set(x, z, y);
+      }
+      else
+      {
+        target.Set(x, y, z);
+      }
+    }
+    else
+    {
+      target.Set(0.0, 0.0, 0.0);
+    }
+
+    is_directional = true;
+  }
+
+  position *= scale;
+  target *= scale;
+  radius *= scale;
+
+  csRef<iLight> light = 
+    m_engine->CreateLight(NULL, position, radius, csColor(1.0, 1.0, 1.0));
+
+  if(is_directional)
+  {
+    light->SetType(CS_LIGHT_DIRECTIONAL);
+
+    target -= position;
+    target.Normalize();
+
+
+    light->GetMovable()->GetTransform().LookAtZUpY(target, 
+                                                   csVector3(0.0, 1.0, 0.0));
+    light->GetMovable()->UpdateMove();
+  }
+
+  iSector *sector = m_engine->GetSectors()->FindByName("scene");
+
+  light->GetMovable()->SetSector(sector);
+  sector->GetLights()->Add(light);
+
+  light->GetMovable()->UpdateMove();
+}
+
+
+void Map2CSApp::AddStart(const iMapEntity *entity, bool rotate, float scale)
+{
+  csVector3 position;
+  double x, y, z;
+
+  if(sscanf(entity->GetValue("origin"), "%lf %lf %lf", &x, &y, &z) == 3)
+  {
+    if(rotate)
+    {
+      position.Set(x, z, y);
+    }
+    else
+    {
+      position.Set(x, y, z);
+    }
+  }
+  else
+  {
+    position.Set(0.0, 0.0, 0.0);
+  }
+
+  position *= scale;
+
+  iCameraPosition *camera_position = 
+    m_engine->GetCameraPositions()->NewCameraPosition(NULL);
+
+  camera_position->Set("scene", position, 
+                       csVector3(0.0, 0.0, 1.0),
+                       csVector3(0.0, 1.0, 0.0));
 }
 
 
@@ -166,6 +292,24 @@ bool Map2CSApp::Application()
 
   ReportInfo("Compiling map '%s'...\n", map_file);
   map_conv->CompileMap(rotate, scale, max_edge_len);
+  ReportInfo("Done\n");
+
+  ReportInfo("Getting entities...\n");
+  for(size_t i = 0; i < map_conv->GetMapEntitiesSize(); ++i)
+  {
+    const iMapEntity *entity = map_conv->GetMapEntity(i);
+
+    csString classname = entity->GetValue("classname");
+
+    if(classname == "light")
+    {
+      AddLight(entity, rotate, scale);
+    }
+    else if(classname == "info_player_start")
+    {
+      AddStart(entity, rotate, scale);
+    }
+  }
   ReportInfo("Done\n");
 
 /*

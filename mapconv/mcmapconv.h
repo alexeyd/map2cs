@@ -50,7 +50,7 @@ class mcMapConv : public scfImplementation2<mcMapConv, iMapConv, iComponent>
                             float max_edge_len,
                             iProgressMeter *meter=0);
  
-    virtual const iMapEntity* GetMapEnitity(size_t index) const;
+    virtual const iMapEntity* GetMapEntity(size_t index) const;
     virtual size_t GetMapEntitiesSize() const;
 };
 

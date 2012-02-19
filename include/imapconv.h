@@ -26,7 +26,7 @@ struct iMapConv : public virtual iBase
                           float max_edge_len,
                           iProgressMeter *meter=0) = 0;
 
-  virtual const iMapEntity* GetMapEnitity(size_t index) const = 0;
+  virtual const iMapEntity* GetMapEntity(size_t index) const = 0;
   virtual size_t GetMapEntitiesSize() const = 0;
 };
 
