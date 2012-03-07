@@ -29,7 +29,7 @@ class mcMapConv : public scfImplementation2<mcMapConv, iMapConv, iComponent>
 
     csRef<iVFS> m_vfs;
 
-    csRef<iSector> m_sector;
+    iSector *m_sector;
     csHash< csRef<iTextureWrapper>, csString > m_texture_map;
 
     mcMapFile *m_map_file;

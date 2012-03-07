@@ -2,17 +2,14 @@
 
 #include "imapconv.h"
 
+CS_IMPLEMENT_APPLICATION
+
 const double MAX_WORLD_COORD = 65536.0;
 const double MIN_WORLD_COORD = -65536.0;
 
 class Map2CSApp : public csApplicationFramework
 {
   private:
-    csRef<iEngine> m_engine;
-    csRef<iVFS> m_vfs;
-    csRef<iCommandLineParser> m_args_parser;
-
-
     void AddLight(const iMapEntity *entity, bool rotate, float scale);
     void AddStart(const iMapEntity *entity, bool rotate, float scale);
 
@@ -56,11 +53,10 @@ bool Map2CSApp::OnInitialize(int argc, char* argv[])
     return false;
   }
 
-  m_engine = csQueryRegistry<iEngine> (object_reg);
-  m_vfs = csQueryRegistry<iVFS> (object_reg);
-  m_args_parser = csQueryRegistry<iCommandLineParser> (object_reg);
+  csRef<iEngine> engine = csQueryRegistry<iEngine> (object_reg);
 
-  m_engine->SetSaveableFlag(true);
+
+  engine->SetSaveableFlag(true);
 
   if (!RequestPlugins (object_reg,
       CS_REQUEST_PLUGIN("crystalspace.documentsystem.tinyxml", iDocumentSystem),
@@ -83,6 +79,8 @@ void Map2CSApp::AddLight(const iMapEntity *entity, bool rotate, float scale)
 
   bool is_directional = false;
   csVector3 target;
+
+  csRef<iEngine> engine = csQueryRegistry<iEngine> (object_reg);
 
   if(sscanf(entity->GetValue("light"), "%lf", &radius) != 1)
   {
@@ -138,7 +136,7 @@ void Map2CSApp::AddLight(const iMapEntity *entity, bool rotate, float scale)
   radius *= scale;
 
   csRef<iLight> light = 
-    m_engine->CreateLight(NULL, position, radius, csColor(1.0, 1.0, 1.0));
+    engine->CreateLight(NULL, position, radius, csColor(1.0, 1.0, 1.0));
 
   if(is_directional)
   {
@@ -153,7 +151,7 @@ void Map2CSApp::AddLight(const iMapEntity *entity, bool rotate, float scale)
     light->GetMovable()->UpdateMove();
   }
 
-  iSector *sector = m_engine->GetSectors()->FindByName("scene");
+  iSector *sector = engine->GetSectors()->FindByName("scene");
 
   light->GetMovable()->SetSector(sector);
   sector->GetLights()->Add(light);
@@ -166,6 +164,8 @@ void Map2CSApp::AddStart(const iMapEntity *entity, bool rotate, float scale)
 {
   csVector3 position;
   double x, y, z;
+
+  csRef<iEngine> engine = csQueryRegistry<iEngine> (object_reg);
 
   if(sscanf(entity->GetValue("origin"), "%lf %lf %lf", &x, &y, &z) == 3)
   {
@@ -186,7 +186,7 @@ void Map2CSApp::AddStart(const iMapEntity *entity, bool rotate, float scale)
   position *= scale;
 
   iCameraPosition *camera_position = 
-    m_engine->GetCameraPositions()->NewCameraPosition(NULL);
+    engine->GetCameraPositions()->NewCameraPosition(NULL);
 
   camera_position->Set("scene", position, 
                        csVector3(0.0, 0.0, 1.0),
@@ -196,23 +196,28 @@ void Map2CSApp::AddStart(const iMapEntity *entity, bool rotate, float scale)
 
 bool Map2CSApp::Application()
 {
-  const char *rc_dir = m_args_parser->GetOption("rc");
-  const char *map_file = m_args_parser->GetOption("map");
-  const char *world_dir = m_args_parser->GetOption("world");
-  const char *ambient_color = m_args_parser->GetOption("ambient");
-  const char *scale_text = m_args_parser->GetOption("scale");
-  const char *max_edge_len_text = m_args_parser->GetOption("max_edge_len");
-  bool rotate = m_args_parser->GetBoolOption("rotate", true);
-
-  float scale = 1.0;
-  double max_edge_len = 8.0;
-
-
   if (!OpenApplication (GetObjectRegistry ()))
   {
     ReportError ("Error opening system!");
     return false;
   }
+
+  csRef<iCommandLineParser> args_parser = 
+    csQueryRegistry<iCommandLineParser> (object_reg);
+
+  const char *rc_dir = args_parser->GetOption("rc");
+  const char *map_file = args_parser->GetOption("map");
+  const char *world_dir = args_parser->GetOption("world");
+  const char *ambient_color = args_parser->GetOption("ambient");
+  const char *scale_text = args_parser->GetOption("scale");
+  const char *max_edge_len_text = args_parser->GetOption("max_edge_len");
+  bool rotate = args_parser->GetBoolOption("rotate", true);
+
+  float scale = 1.0;
+  double max_edge_len = 8.0;
+
+  csRef<iEngine> engine = csQueryRegistry<iEngine> (object_reg);
+  csRef<iVFS> vfs = csQueryRegistry<iVFS> (object_reg);
 
   if(!rc_dir)
   {
@@ -237,7 +242,7 @@ bool Map2CSApp::Application()
     float r, g, b;
     if(sscanf(ambient_color, "%f, %f, %f\n", &r, &g, &b) == 3)
     {
-      m_engine->SetAmbientLight(csColor(r, g, b));
+      engine->SetAmbientLight(csColor(r, g, b));
     }
     else
     {
@@ -276,11 +281,13 @@ bool Map2CSApp::Application()
     }
   }
 
-  if(!m_vfs->Mount ("/world", world_dir))
+  if(!vfs->Mount ("/world", world_dir))
   {
     ReportError("Failed to mount world dir (%s)!\n", world_dir);
     return false;
   }
+
+  vfs->ChDir("/this");
 
   csRef<iMapConv> map_conv = csQueryRegistry<iMapConv> (object_reg);
   ReportInfo("Reading map '%s'...\n", map_file);
@@ -324,10 +331,12 @@ bool Map2CSApp::Application()
   ReportInfo("Writing world...\n");
 
   /* create a stub to ensure that directory will be created */
-  m_vfs->ChDir("/world/textures");
-  m_vfs->WriteFile("map2cs_stub", "abc\n", 4);
+  vfs->ChDir("/world/textures");
+  vfs->WriteFile("map2cs_stub", "abc\n", 4);
 
-  doc->Write(m_vfs, "/world/world");
+  doc->Write(vfs, "/world/world");
+
+  vfs->Sync();
 
   ReportInfo("Done.\n");
 
@@ -335,7 +344,6 @@ bool Map2CSApp::Application()
 }
 
 
-CS_IMPLEMENT_APPLICATION
 
 
 int main (int argc, char *argv[])

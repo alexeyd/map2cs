@@ -40,7 +40,7 @@ const char* mcMapEntity::GetName() const
 
 const char* mcMapEntity::GetValue(const char *key) const
 {
-  const csString &value = m_key_value_map.Get("cs_name", csString(""));
+  const csString &value = m_key_value_map.Get(key, csString(""));
   if(value == "")
   {
     return "";

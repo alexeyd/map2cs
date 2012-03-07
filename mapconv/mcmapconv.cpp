@@ -274,15 +274,17 @@ bool mcMapConv::Initialize(iObjectRegistry *obj_reg)
 
   m_vfs = csQueryRegistry<iVFS> (obj_reg);
 
-  m_sector = m_engine->CreateSector("scene");
-
   m_map_file = new mcMapFile(obj_reg);
+
+  return true;
 }
 
 
 bool mcMapConv::LoadMap(const char *resource_dir,
                         const char *map_filename)
 {
+  m_sector = m_engine->CreateSector("scene");
+
   if(!m_vfs->Mount("/rc", resource_dir))
   {
     csPrintf("Failed to mount resource dir (%s)!\n", resource_dir);
