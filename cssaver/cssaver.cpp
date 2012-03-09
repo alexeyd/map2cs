@@ -1349,11 +1349,13 @@ bool csSaver::SaveSettings (iDocumentNode* node)
   engine->GetAmbientLight(c);
   synldr->WriteColor(ambientNode, c);
 
+#if 0  // this section leads to segfault during deinit
   iRenderLoop* renderloop = engine->GetCurrentDefaultRenderloop();
   const char* loopName = engine->GetRenderLoopManager()->GetName(renderloop);
   if (strcmp (loopName, CS_DEFAULT_RENDERLOOP_NAME))
     CreateNode(settingsNode, "renderloop")
       ->CreateNodeBefore(CS_NODE_TEXT, 0)->SetValue(loopName);
+#endif
 
   return true;
 }

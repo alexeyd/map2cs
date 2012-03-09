@@ -294,7 +294,7 @@ bool Map2CSApp::Application()
   if( !(map_conv->LoadMap(rc_dir, map_file)) )
   {
     ReportError("Failed to load map!\n");
-    return 1;
+    return false;
   }
   ReportInfo("Done\n");
 
@@ -320,21 +320,14 @@ bool Map2CSApp::Application()
   }
   ReportInfo("Done\n");
 
-
-  csRef<iSaver> saver = csQueryRegistry<iSaver> (object_reg);
-  csRef<iDocumentSystem> xml = csQueryRegistry<iDocumentSystem>(object_reg);
-  csRef <iDocument> doc = xml->CreateDocument();
-  csRef <iDocumentNode> root = doc->CreateRoot();
-
-  saver->SaveMapFile(root);
-
   ReportInfo("Writing world...\n");
 
   /* create a stub to ensure that directory will be created */
   vfs->ChDir("/world/textures");
   vfs->WriteFile("map2cs_stub", "abc\n", 4);
 
-  doc->Write(vfs, "/world/world");
+  csRef<iSaver> saver = csQueryRegistry<iSaver> (object_reg);
+  saver->SaveMapFile("/world/world");
 
   vfs->Sync();
 
