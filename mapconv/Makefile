@@ -77,7 +77,7 @@ CFLAGS.I = -I
 # Make sure to update the required libraries for your own project
 #------
 CFLAGS := $(shell cs-config --cflags) -g
-CXXFLAGS := $(shell cs-config --cxxflags) -g -DCS_DEBUG -I../include
+CXXFLAGS := $(shell cs-config --cxxflags) -fPIC -g -DCS_DEBUG -I../include
 LINKFLAGS := $(shell cs-config --libs crystalspace) -g
 
 DO.SHARED.PLUGIN.CORE=$(LINK) $(LFLAGS.DLL) -o $@ $^ $(PLUGIN.POSTFLAGS)
